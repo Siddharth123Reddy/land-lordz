@@ -1,0 +1,148 @@
+.container {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+  background: #faf5ff;
+}
+
+/* LEFT */
+.left {
+  width: 55%;
+  background: url("/farmers.jpg") center/cover no-repeat;
+  position: relative;
+  filter: brightness(0.95);
+}
+
+.overlay {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.3)
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+  color: #ffffff;
+}
+
+.heroTitle {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.heroTitle span {
+  color: #f59e0b;
+}
+
+.heroText {
+  max-width: 450px;
+  line-height: 1.6;
+}
+
+/* RIGHT */
+.right {
+  width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 420px;
+  background: #ffffff;
+  padding: 45px;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(124, 58, 237, 0.15);
+  transition: 0.3s ease;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.heading {
+  text-align: center;
+  font-size: 24px;
+  color: #7c3aed;
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  border: 1px solid #e9d5ff;
+  transition: 0.3s ease;
+}
+
+.input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+
+.button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(90deg, #7c3aed, #f59e0b);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.35);
+}
+
+.preview img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.bottomText {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.bottomText span {
+  color: #7c3aed;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bottomText span:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left {
+    width: 100%;
+    height: 40vh;
+  }
+
+  .right {
+    width: 100%;
+    height: 60vh;
+  }
+
+  .card {
+    width: 90%;
+  }
+}

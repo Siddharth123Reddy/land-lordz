@@ -6,7 +6,7 @@ export default function DashboardPage() {
       </h1>
 
       <p style={{ color: "#6b7280" }}>
-        Welcome to LAND-LORDZ Property Management.
+        Welcome to LAND-LORDZ.
       </p>
     </div>
   );

@@ -1,0 +1,194 @@
+/* ================= CONTAINER ================= */
+
+.container {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+  background: #faf5ff;
+  overflow: hidden;
+}
+
+/* ================= LEFT SIDE ================= */
+
+.left {
+  width: 55%;
+  background: url("/farmers.jpg") center center / cover no-repeat;
+  position: relative;
+  filter: brightness(0.95) contrast(1.05);
+}
+
+/* Subtle professional dark gradient (NOT purple wash) */
+.overlay {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.35),
+    rgba(0, 0, 0, 0.15)
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+  color: #ffffff;
+}
+
+/* Hero text */
+.heroTitle {
+  font-size: 44px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.heroTitle span {
+  color: #f59e0b;
+}
+
+.heroText {
+  max-width: 480px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #f3f4f6;
+}
+
+/* ================= RIGHT SIDE ================= */
+
+.right {
+  width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #faf5ff;
+}
+
+/* Login Card */
+.card {
+  width: 420px;
+  background: #ffffff;
+  padding: 50px 40px;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(124, 58, 237, 0.15);
+  transition: 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Logo */
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+/* Heading */
+.heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.sub {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  border: 1px solid #e9d5ff;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s ease;
+  background: #fafafa;
+}
+
+.input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  background: #ffffff;
+}
+
+/* Button */
+.button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #7c3aed, #f59e0b);
+  color: white;
+  transition: 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.35);
+}
+
+/* Register Link */
+.linkText {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.linkText span {
+  color: #7c3aed;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.linkText span:hover {
+  text-decoration: underline;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 1024px) {
+  .left {
+    width: 50%;
+  }
+
+  .right {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left {
+    width: 100%;
+    height: 40vh;
+  }
+
+  .right {
+    width: 100%;
+    height: 60vh;
+  }
+
+  .overlay {
+    padding: 40px;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+  }
+
+  .card {
+    width: 90%;
+  }
+}

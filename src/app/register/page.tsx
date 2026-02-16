@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, CSSProperties } from "react";
+import { useState } from "react";
+import styles from "./register.module.css";
 
 export default function RegisterPage() {
   const router = useRouter();
-
-  /* ---------------- STATE ---------------- */
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -21,10 +20,9 @@ export default function RegisterPage() {
   const [district, setDistrict] = useState("");
   const [stateName, setStateName] = useState("");
 
-  const [profilePic, setProfilePic] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
 
-  /* ---------------- STEP 1 : CHECK CONTACT ---------------- */
+  /* ================= STEP 1 ================= */
 
   const handleCheckContact = async () => {
     if (!contact.trim()) {
@@ -48,14 +46,29 @@ export default function RegisterPage() {
       } else {
         setStep(2);
       }
-    } catch {
+    } catch (error) {
       alert("Server error");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------- REGISTER + IMAGE + AUTO LOGIN ---------------- */
+  /* ================= FILE TO BASE64 ================= */
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setPreview(reader.result as string); // base64 string
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  /* ================= REGISTER ================= */
 
   const handleRegister = async () => {
     if (!name.trim() || !contact.trim() || !password.trim()) {
@@ -66,7 +79,6 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // 🔹 Register user first
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +91,7 @@ export default function RegisterPage() {
           address: address || null,
           district: district || null,
           state: stateName || null,
-          profile_pic: null,
+          profile_pic: preview || null, // IMPORTANT
         }),
       });
 
@@ -90,94 +102,48 @@ export default function RegisterPage() {
         return;
       }
 
-      const farmerId = data.farmerId;
-
-      // 🔹 Upload profile pic if selected
-      if (profilePic) {
-        const formData = new FormData();
-        formData.append("file", profilePic);
-        formData.append("farmerId", farmerId);
-
-        const uploadRes = await fetch("/api/upload-profile-pic", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          alert("Profile picture upload failed");
-          return;
-        }
-      }
-
-      // 🔹 Auto login
-      const loginRes = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contact: contact.trim(),
-          password: password.trim(),
-        }),
-      });
-
-      const loginData = await loginRes.json();
-
-      if (!loginRes.ok || !loginData.farmerId) {
-        alert("Auto login failed");
-        return;
-      }
-
-      localStorage.clear();
-      localStorage.setItem("farmerId", loginData.farmerId);
-
+      localStorage.setItem("farmerId", data.farmerId);
       router.push("/dashboard");
-    } catch {
+
+    } catch (error) {
       alert("Server error");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------- FILE PREVIEW ---------------- */
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setProfilePic(file);
-
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  /* ---------------- UI ---------------- */
+  /* ================= UI ================= */
 
   return (
-    <div style={styles.container}>
-      {/* LEFT */}
-      <div style={styles.left}>
-        <div style={styles.overlay}>
-          <h1 style={styles.brand}>LAND-LORDZ</h1>
-          <p style={styles.tagline}>
-            Smart Agricultural Registration & Digital Land Verification 🌾
+    <div className={styles.container}>
+      
+      <div className={styles.left}>
+        <div className={styles.overlay}>
+          <h1 className={styles.heroTitle}>
+            Join LAND-LORDZ <span>Today</span>
+          </h1>
+          <p className={styles.heroText}>
+            Register your land digitally and unlock smart agricultural insights.
           </p>
         </div>
       </div>
 
-      {/* RIGHT */}
-      <div style={styles.right}>
-        <div style={styles.card}>
+      <div className={styles.right}>
+        <div className={styles.card}>
+
           {step === 1 && (
             <>
-              <h2 style={styles.heading}>Create Account</h2>
+              <h2 className={styles.heading}>Register Account</h2>
 
               <input
-                style={styles.input}
+                className={styles.input}
                 placeholder="Phone or Email"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
               />
 
               <button
-                style={styles.primaryBtn}
+                className={styles.button}
                 onClick={handleCheckContact}
                 disabled={loading}
               >
@@ -188,17 +154,17 @@ export default function RegisterPage() {
 
           {step === 2 && (
             <>
-              <h2 style={styles.heading}>Complete Registration</h2>
+              <h2 className={styles.heading}>Complete Registration</h2>
 
               <input
-                style={styles.input}
+                className={styles.input}
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
 
               <input
-                style={styles.input}
+                className={styles.input}
                 type="password"
                 placeholder="Password"
                 value={password}
@@ -206,7 +172,7 @@ export default function RegisterPage() {
               />
 
               <select
-                style={styles.input}
+                className={styles.input}
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
               >
@@ -217,122 +183,65 @@ export default function RegisterPage() {
               </select>
 
               <input
-                style={styles.input}
+                className={styles.input}
                 type="number"
                 placeholder="Age (Optional)"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
               />
 
-              <textarea
-                style={{ ...styles.input, height: "80px" }}
+              <input
+                className={styles.input}
                 placeholder="Address (Optional)"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
 
               <input
-                style={styles.input}
+                className={styles.input}
                 placeholder="District (Optional)"
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
               />
 
               <input
-                style={styles.input}
+                className={styles.input}
                 placeholder="State (Optional)"
                 value={stateName}
                 onChange={(e) => setStateName(e.target.value)}
               />
 
               {preview && (
-                <div style={{ textAlign: "center", marginBottom: 10 }}>
-                  <img
-                    src={preview}
-                    width={100}
-                    height={100}
-                    style={{ borderRadius: "50%", objectFit: "cover" }}
-                  />
+                <div className={styles.preview}>
+                  <img src={preview} alt="Profile Preview" />
                 </div>
               )}
 
-              <input type="file" accept="image/*" onChange={handleFileChange} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
 
               <button
-                style={styles.primaryBtn}
+                className={styles.button}
                 onClick={handleRegister}
                 disabled={loading}
               >
-                {loading
-                  ? "Creating Account..."
-                  : "Register & Go to Dashboard"}
+                {loading ? "Registering..." : "Register & Go to Dashboard"}
               </button>
             </>
           )}
 
-          <p style={styles.bottomText}>
+          <p className={styles.bottomText}>
             Already have an account?{" "}
-            <span style={styles.link} onClick={() => router.push("/login")}>
+            <span onClick={() => router.push("/login")}>
               Login
             </span>
           </p>
+
         </div>
       </div>
     </div>
   );
 }
-
-/* ---------------- STYLES ---------------- */
-
-const styles: Record<string, CSSProperties> = {
-  container: { display: "flex", minHeight: "100vh", fontFamily: "Arial" },
-  left: {
-    width: "50%",
-    background: "url('/farming.jpg') center/cover no-repeat",
-  },
-  overlay: {
-    height: "100%",
-    background: "rgba(0,0,0,0.7)",
-    color: "#fff",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    padding: "60px",
-  },
-  brand: { fontSize: "40px", fontWeight: "bold", marginBottom: "20px" },
-  tagline: { maxWidth: "400px", lineHeight: 1.6 },
-  right: {
-    width: "50%",
-    background: "#f0fdf4",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    width: "420px",
-    background: "#fff",
-    padding: "40px",
-    borderRadius: "18px",
-    boxShadow: "0 15px 40px rgba(0,0,0,0.1)",
-  },
-  heading: { marginBottom: "20px" },
-  input: {
-    width: "100%",
-    padding: "12px",
-    marginBottom: "15px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-  },
-  primaryBtn: {
-    width: "100%",
-    padding: "12px",
-    background: "#16a34a",
-    color: "#fff",
-    borderRadius: "8px",
-    border: "none",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  bottomText: { marginTop: "20px", textAlign: "center" },
-  link: { color: "#16a34a", fontWeight: "bold", cursor: "pointer" },
-};

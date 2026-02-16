@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import styles from "./dashboard.module.css";
 
 export default function DashboardLayout({
@@ -9,124 +11,81 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const [farmer, setFarmer] = useState<any>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const farmerId = localStorage.getItem("farmerId");
-    if (!farmerId) return;
-
-    fetch(`/api/farmer/profile?farmerId=${farmerId}`)
-      .then(res => res.json())
-      .then(data => setFarmer(data))
-      .catch(() => setFarmer(null));
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("farmerId");
-    router.push("/");
+    localStorage.removeItem("user");
+    window.location.href = "/";
   };
 
   return (
-    <div className={styles.container}>
-     <aside className={styles.sidebar}>
-  <h2 className={styles.logo}>LAND-LORDZ</h2>
+    <>
+      <nav className={styles.navbar}>
+        {/* 🔲 BLACK AREA - Logo + Name */}
+        <div className={styles.logoSection}>
+          <Image src="/logoL.png" alt="Logo" width={45} height={45} />
+          <span className={styles.brandName}>LAND-LORDZ</span>
+        </div>
 
-  <ul className={styles.menu}>
-    <li onClick={() => router.push("/dashboard")}>
-      Dashboard
-    </li>
-
-    <li onClick={() => router.push("/dashboard/properties")}>
-      Properties
-    </li>
-  </ul>
-
-  <div className={styles.settingsSection}>
-    <p className={styles.settingsTitle}>Settings</p>
-
-    <ul>
-      <li onClick={() => router.push("/dashboard/profile")}>
-        Profile
-      </li>
-
-      <li>
-        Inbox
-      </li>
-
-      <li>
-        Settings
-      </li>
-    </ul>
-
-    <div className={styles.sidebarFooter}>
-      © 2026 LAND-LORDZ
-    </div>
-  </div>
-</aside>
-
-      {/* MAIN AREA */}
-      <div className={styles.main}>
-        
-       {/* TOP BAR */}
-<div className={styles.topbar}>
-  <div></div>
-
-  {farmer && (
-    <div className={styles.profileWrapper}>
-      <div
-        className={styles.profileCircle}
-        onClick={() => setShowDropdown(!showDropdown)}
-      >
-        {farmer.profile_pic ? (
-          <img
-            src={farmer.profile_pic}
-            alt="Profile"
-            className={styles.profileCircleImg}
-          />
-        ) : (
-          farmer.name.charAt(0).toUpperCase()
-        )}
-      </div>
-
-      {showDropdown && (
-        <div className={styles.dropdown}>
-          {farmer.profile_pic && (
-            <img
-              src={farmer.profile_pic}
-              alt="Profile"
-              className={styles.profileLarge}
-            />
-          )}
-
-          <h3>{farmer.name}</h3>
-          <p><strong>Gender:</strong> {farmer.gender || "-"}</p>
-          <p><strong>Age:</strong> {farmer.age || "-"}</p>
-          <p><strong>District:</strong> {farmer.district || "-"}</p>
-          <p><strong>State:</strong> {farmer.state || "-"}</p>
-
-          <hr />
-
-          <button
-            className={styles.logoutBtn}
-            onClick={handleLogout}
+        {/* 🟨 YELLOW AREA - Links */}
+        <div className={styles.navLinks}>
+          <Link
+            href="/dashboard"
+            className={pathname === "/dashboard" ? styles.active : ""}
           >
-            Logout
-          </button>
+            Dashboard
+          </Link>
+          <Link
+            href="/dashboard/properties"
+            className={
+              pathname === "/dashboard/properties" ? styles.active : ""
+            }
+          >
+            Properties
+          </Link>
+          <Link
+            href="/dashboard/profile"
+            className={
+              pathname === "/dashboard/profile" ? styles.active : ""
+            }
+          >
+            Profile
+          </Link>
         </div>
-      )}
-    </div>
-  )}
-</div>
 
+        {/* 🟩 GREEN AREA - Profile Pic + Logout */}
+        <div className={styles.profileWrapper}>
+          {user && (
+            <>
+              <Image
+                src={`data:image/png;base64,${user.profile_image_base64}`}
+                alt="Profile"
+                width={42}
+                height={42}
+                className={styles.profilePic}
+                onClick={() => setOpen(!open)}
+              />
 
-        {/* PAGE CONTENT */}
-        <div className={styles.content}>
-          {children}
+              {open && (
+                <div className={styles.dropdown}>
+                  <button onClick={handleLogout}>Logout</button>
+                </div>
+              )}
+            </>
+          )}
         </div>
+      </nav>
 
-      </div>
-    </div>
+      <main className={styles.mainContent}>{children}</main>
+    </>
   );
 }

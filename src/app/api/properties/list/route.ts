@@ -7,20 +7,25 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const farmerId = searchParams.get("farmerId");
 
+    if (!farmerId) {
+      return NextResponse.json([], { status: 200 });
+    }
+
     const db = await getDb();
 
     const result = await db.request()
       .input("farmer_id", sql.Int, Number(farmerId))
       .query(`
-        SELECT * FROM Properties
+        SELECT *
+        FROM dbo.Properties
         WHERE farmer_id = @farmer_id
-        ORDER BY created_at DESC
+        ORDER BY property_id DESC
       `);
 
     return NextResponse.json(result.recordset);
 
   } catch (err) {
-    console.error(err);
-    return NextResponse.json([]);
+    console.error("LIST PROPERTY ERROR:", err);
+    return NextResponse.json([], { status: 500 });
   }
 }

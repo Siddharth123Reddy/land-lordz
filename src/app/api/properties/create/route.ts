@@ -4,28 +4,61 @@ import { getDb } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { farmerId, property_name, location, geo_point } = await req.json();
+    const body = await req.json();
+
+    const {
+      farmerId,
+      property_name,
+      property_type,
+      location,
+      geo_location,
+      property_image,
+    } = body;
+
+    if (!farmerId) {
+      return NextResponse.json(
+        { error: "farmerId missing" },
+        { status: 400 }
+      );
+    }
 
     const db = await getDb();
 
-    const result = await db.request()
-      .input("farmer_id", sql.Int, farmerId)
-      .input("property_name", sql.VarChar(100), property_name)
-      .input("location", sql.VarChar(100), location)
-      .input("geo_point", sql.VarChar(200), geo_point)
+    await db.request()
+      .input("farmer_id", sql.Int, Number(farmerId))
+      .input("property_name", sql.VarChar, property_name)
+      .input("property_type", sql.VarChar, property_type)
+      .input("location", sql.VarChar, location)
+      .input("geo_location", sql.VarChar, geo_location)
+      .input("property_image", sql.VarChar(sql.MAX), property_image)
       .query(`
-        INSERT INTO Properties (farmer_id, property_name, location, geo_point)
-        OUTPUT INSERTED.property_id
-        VALUES (@farmer_id, @property_name, @location, @geo_point)
+        INSERT INTO dbo.Properties
+        (
+          farmer_id,
+          property_name,
+          property_type,
+          location,
+          geo_location,
+          property_image
+        )
+        VALUES
+        (
+          @farmer_id,
+          @property_name,
+          @property_type,
+          @location,
+          @geo_location,
+          @property_image
+        )
       `);
 
-    return NextResponse.json({
-      success: true,
-      property_id: result.recordset[0].property_id
-    });
+    return NextResponse.json({ success: true });
 
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ message: "Error" }, { status: 500 });
+    console.error("CREATE PROPERTY ERROR:", err);
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }

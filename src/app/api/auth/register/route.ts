@@ -17,6 +17,7 @@ export async function POST(req: Request) {
       address,
       district,
       state,
+      profile_pic,   // ✅ ADD THIS
     } = body;
 
     if (!name || !contact || !password) {
@@ -27,11 +28,9 @@ export async function POST(req: Request) {
     }
 
     const trimmedContact = contact.trim().toLowerCase();
-
-    // 🔐 Hash password
     const passwordHash = await hashPassword(password);
 
-    // 🚫 Check duplicate contact
+    // Check duplicate
     const exists = await db
       .request()
       .input("contact", sql.NVarChar(100), trimmedContact)
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Insert with optional fields
+    // ✅ INSERT INCLUDING profile_pic
     const result = await db
       .request()
       .input("name", sql.NVarChar(100), name)
@@ -59,13 +58,14 @@ export async function POST(req: Request) {
       .input("address", sql.NVarChar(255), address || null)
       .input("district", sql.NVarChar(100), district || null)
       .input("state", sql.NVarChar(100), state || null)
+      .input("profile_pic", sql.NVarChar(sql.MAX), profile_pic || null) // ✅ IMPORTANT
       .input("status", sql.Int, 1)
       .query(`
         INSERT INTO dbo.Farmers 
-        (name, contact, password_hash, age, gender, address, district, state, status)
+        (name, contact, password_hash, age, gender, address, district, state, profile_pic, status)
         OUTPUT INSERTED.farmer_id
         VALUES 
-        (@name, @contact, @password_hash, @age, @gender, @address, @district, @state, @status)
+        (@name, @contact, @password_hash, @age, @gender, @address, @district, @state, @profile_pic, @status)
       `);
 
     return NextResponse.json({
