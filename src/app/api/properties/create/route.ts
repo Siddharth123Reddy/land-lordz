@@ -7,57 +7,54 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const {
-      farmerId,
+      farmer_id,
       property_name,
       property_type,
       location,
       geo_location,
       property_image,
+      property_meta,
     } = body;
 
-    if (!farmerId) {
+    if (!farmer_id || !property_name) {
       return NextResponse.json(
-        { error: "farmerId missing" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const db = await getDb();
+    const pool = await getDb();
 
-    await db.request()
-      .input("farmer_id", sql.Int, Number(farmerId))
-      .input("property_name", sql.VarChar, property_name)
-      .input("property_type", sql.VarChar, property_type)
-      .input("location", sql.VarChar, location)
-      .input("geo_location", sql.VarChar, geo_location)
-      .input("property_image", sql.VarChar(sql.MAX), property_image)
+    /* ===============================
+       INSERT PROPERTY + RETURN ID
+    =============================== */
+    const result = await pool.request()
+      .input("farmer_id", sql.Int, farmer_id)
+      .input("property_name", sql.VarChar(150), property_name)
+      .input("property_type", sql.VarChar(100), property_type)
+      .input("location", sql.VarChar(150), location)
+      .input("geo_location", sql.VarChar(255), geo_location)
+      .input("property_image", sql.NVarChar(sql.MAX), property_image || null)
+      .input("property_meta", sql.NVarChar(sql.MAX), property_meta || null)
       .query(`
-        INSERT INTO dbo.Properties
-        (
-          farmer_id,
-          property_name,
-          property_type,
-          location,
-          geo_location,
-          property_image
-        )
+        INSERT INTO Properties
+        (farmer_id, property_name, property_type, location, geo_location, property_image, property_meta, created_at)
+        OUTPUT INSERTED.property_id
         VALUES
-        (
-          @farmer_id,
-          @property_name,
-          @property_type,
-          @location,
-          @geo_location,
-          @property_image
-        )
+        (@farmer_id, @property_name, @property_type, @location, @geo_location, @property_image, @property_meta, GETDATE())
       `);
 
-    return NextResponse.json({ success: true });
+    const newPropertyId = result.recordset[0].property_id;
 
-  } catch (err) {
-    console.error("CREATE PROPERTY ERROR:", err);
+    return NextResponse.json({
+      success: true,
+      property_id: newPropertyId,
+    });
+
+  } catch (error) {
+    console.error("Create Property Error:", error);
     return NextResponse.json(
-      { error: "Server error" },
+      { error: "Failed to create property" },
       { status: 500 }
     );
   }

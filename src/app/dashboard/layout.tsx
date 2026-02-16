@@ -16,27 +16,34 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const farmerId = localStorage.getItem("farmer_id");
+
+    if (!farmerId || farmerId === "undefined") return;
+
+    fetch(`/api/farmer/profile?farmerId=${farmerId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("PROFILE DATA:", data);
+        setUser(data);
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("farmer_id");
     window.location.href = "/";
   };
 
   return (
     <>
       <nav className={styles.navbar}>
-        {/* 🔲 BLACK AREA - Logo + Name */}
+        {/* LEFT - Logo */}
         <div className={styles.logoSection}>
           <Image src="/logoL.png" alt="Logo" width={45} height={45} />
           <span className={styles.brandName}>LAND-LORDZ</span>
         </div>
 
-        {/* 🟨 YELLOW AREA - Links */}
+        {/* CENTER - Links */}
         <div className={styles.navLinks}>
           <Link
             href="/dashboard"
@@ -44,6 +51,7 @@ export default function DashboardLayout({
           >
             Dashboard
           </Link>
+
           <Link
             href="/dashboard/properties"
             className={
@@ -52,6 +60,7 @@ export default function DashboardLayout({
           >
             Properties
           </Link>
+
           <Link
             href="/dashboard/profile"
             className={
@@ -62,15 +71,13 @@ export default function DashboardLayout({
           </Link>
         </div>
 
-        {/* 🟩 GREEN AREA - Profile Pic + Logout */}
+        {/* RIGHT - Profile */}
         <div className={styles.profileWrapper}>
-          {user && (
+          {user && user.profile_pic && (
             <>
-              <Image
-                src={`data:image/png;base64,${user.profile_image_base64}`}
+              <img
+                src={user.profile_pic}  
                 alt="Profile"
-                width={42}
-                height={42}
                 className={styles.profilePic}
                 onClick={() => setOpen(!open)}
               />

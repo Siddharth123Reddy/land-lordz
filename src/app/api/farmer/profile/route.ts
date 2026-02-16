@@ -55,6 +55,7 @@ export async function GET(req: Request) {
   }
 }
 
+
 /* =========================
    UPDATE PROFILE
 ========================= */
@@ -67,7 +68,7 @@ export async function PUT(req: Request) {
       gender,
       age,
       address,
-      contact,
+      district
     } = body;
 
     if (!farmerId) {
@@ -82,17 +83,17 @@ export async function PUT(req: Request) {
     await db
       .request()
       .input("farmer_id", sql.Int, Number(farmerId))
-      .input("gender", sql.VarChar, gender)
+      .input("gender", sql.VarChar(50), gender)
       .input("age", sql.Int, Number(age))
-      .input("address", sql.VarChar, address)
-      .input("contact", sql.VarChar, contact)
+      .input("address", sql.VarChar(255), address)
+      .input("district", sql.VarChar(100), district)
       .query(`
         UPDATE dbo.Farmers
         SET 
           gender = @gender,
           age = @age,
           address = @address,
-          contact = @contact
+          district = @district
         WHERE farmer_id = @farmer_id
       `);
 

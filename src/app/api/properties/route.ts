@@ -2,79 +2,108 @@ import { NextResponse } from "next/server";
 import sql from "mssql";
 import { getDb } from "@/lib/db";
 
-/* ================= GET PROPERTIES ================= */
-export async function GET() {
+/* ===============================
+   GET - List Properties
+================================= */
+
+export async function GET(req: Request) {
   try {
-    const db = await getDb();
+    const { searchParams } = new URL(req.url);
+    const farmer_id = searchParams.get("farmer_id");
 
-    const result = await db.request().query(`
-      SELECT property_id, name, location
-      FROM dbo.Properties
-    `);
-
-    console.log("PROPERTIES:", result.recordset);
-
-    return NextResponse.json(result.recordset || []);
-
-  } catch (err) {
-    console.error("GET PROPERTIES ERROR:", err);
-    return NextResponse.json([], { status: 500 }); // always return array
-  }
-}
-
-/* ================= ADD PROPERTY ================= */
-export async function POST(req: Request) {
-  try {
-    const { name, location } = await req.json();
-
-    if (!name || !location) {
+    if (!farmer_id) {
       return NextResponse.json(
-        { message: "All fields required" },
+        { error: "farmer_id is required" },
         { status: 400 }
       );
     }
 
-    const db = await getDb();
+    const pool = await getDb();
 
-    await db.request()
-      .input("name", sql.VarChar(100), name.trim())
-      .input("location", sql.VarChar(100), location.trim())
+    const result = await pool.request()
+      .input("farmer_id", sql.Int, farmer_id)
       .query(`
-        INSERT INTO dbo.Properties (name, location)
-        VALUES (@name, @location)
+        SELECT *
+        FROM Properties
+        WHERE farmer_id = @farmer_id
+        ORDER BY created_at DESC
       `);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(result.recordset);
 
-  } catch (err) {
-    console.error("ADD PROPERTY ERROR:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  } catch (error) {
+    console.error("GET Properties Error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch properties" },
+      { status: 500 }
+    );
   }
 }
 
-/* ================= DELETE PROPERTY ================= */
-export async function DELETE(req: Request) {
+/* ===============================
+   POST - Add Property
+================================= */
+
+export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const body = await req.json();
 
-    if (!id) {
-      return NextResponse.json({ message: "ID required" }, { status: 400 });
-    }
+    const {
+      farmer_id,
+      property_name,
+      property_type,
+      location,
+      geo_location,
+      property_image,
+      property_meta,
+    } = body;
 
-    const db = await getDb();
+    const pool = await getDb();
 
-    await db.request()
-      .input("id", sql.Int, Number(id))
+    const result = await pool.request()
+      .input("farmer_id", sql.Int, farmer_id)
+      .input("property_name", sql.VarChar(150), property_name)
+      .input("property_type", sql.VarChar(100), property_type)
+      .input("location", sql.VarChar(150), location)
+      .input("geo_location", sql.VarChar(255), geo_location)
+      .input("property_image", sql.NVarChar(sql.MAX), property_image)
+      .input("property_meta", sql.NVarChar(sql.MAX), property_meta)
       .query(`
-        DELETE FROM dbo.Properties
-        WHERE property_id = @id
+        INSERT INTO Properties
+        (
+          farmer_id,
+          property_name,
+          property_type,
+          location,
+          geo_location,
+          property_image,
+          property_meta,
+          created_at
+        )
+        OUTPUT INSERTED.property_id
+        VALUES
+        (
+          @farmer_id,
+          @property_name,
+          @property_type,
+          @location,
+          @geo_location,
+          @property_image,
+          @property_meta,
+          GETDATE()
+        )
       `);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      property_id: result.recordset[0].property_id,
+    });
 
-  } catch (err) {
-    console.error("DELETE PROPERTY ERROR:", err);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+  } catch (error) {
+    console.error("POST Property Error:", error);
+    return NextResponse.json(
+      { error: "Failed to add property" },
+      { status: 500 }
+    );
   }
 }

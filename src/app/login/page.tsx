@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
-import styles from "./login.module.css";
+import styles from "../register/register.module.css"; // 🔥 USE SAME CSS
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,21 +31,15 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (!res.ok || !data.farmerId) {
         alert(data.message || "Invalid credentials");
         return;
       }
 
-      if (!data.farmerId) {
-        alert("Login failed: farmerId missing");
-        return;
-      }
+      // ✅ FIXED KEY
+      localStorage.setItem("farmer_id", data.farmerId.toString());
 
-      // ✅ Save farmerId
-      localStorage.setItem("farmerId", String(data.farmerId));
-
-      // ✅ Clean navigation (no back loop)
-      router.replace("/dashboard");
+      router.push("/dashboard");
 
     } catch (err) {
       console.error(err);
@@ -58,30 +51,24 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      
-      {/* LEFT SIDE */}
+
+      {/* LEFT SIDE SAME AS REGISTER */}
       <div className={styles.left}>
         <div className={styles.overlay}>
           <h1 className={styles.heroTitle}>
-            Smart Farming <br />
-            <span>Starts Here</span>
+            Welcome Back to <span>LAND-LORDZ</span>
           </h1>
-
           <p className={styles.heroText}>
-            Manage land records, verify ownership, and unlock
-            intelligent agricultural insights with LAND-LORDZ.
+            Access your land records, properties and smart agricultural insights.
           </p>
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
+      {/* RIGHT SIDE LOGIN CARD */}
       <div className={styles.right}>
         <div className={styles.card}>
-          
-        
 
-          <h2 className={styles.heading}>Welcome Back</h2>
-          <p className={styles.sub}>Login </p>
+          <h2 className={styles.heading}>Login to Account</h2>
 
           <input
             className={styles.input}
@@ -106,12 +93,13 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          <p className={styles.linkText}>
-            New to Land LordZ?{" "}
+          <p className={styles.bottomText}>
+            Don’t have an account?{" "}
             <span onClick={() => router.push("/register")}>
               Register
             </span>
           </p>
+
         </div>
       </div>
     </div>

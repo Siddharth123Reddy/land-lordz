@@ -1,13 +1,13 @@
+"use client";
+
+import styles from "./dashboard.module.css";
+
 export default function DashboardPage() {
   return (
-    <div>
-      <h1 style={{ marginBottom: "10px" }}>
-        Dashboard Overview
+    <div className={styles.dashboardContainer}>
+      <h1 className={styles.dashboardTitle}>
+        Welcome To <span>LAND-LORDZ</span>
       </h1>
-
-      <p style={{ color: "#6b7280" }}>
-        Welcome to LAND-LORDZ.
-      </p>
     </div>
   );
 }
