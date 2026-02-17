@@ -28,35 +28,131 @@ export default function PropertyDetailPage() {
   const [documentData, setDocumentData] =
     useState<DocumentType | null>(null);
 
+  const [metaData, setMetaData] = useState<any>({});
+  const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [newImage, setNewImage] = useState<string | null>(null);
+  const [newDocument, setNewDocument] = useState<string | null>(null);
+
+  /* ================= FETCH DATA ================= */
+
   useEffect(() => {
     if (!propertyId) return;
 
     const fetchData = async () => {
-      try {
-        const propertyRes = await fetch(
-          `/api/properties/list?property_id=${propertyId}`
-        );
-        const propertyData = await propertyRes.json();
+      const propertyRes = await fetch(
+        `/api/properties/list?property_id=${propertyId}`
+      );
+      const propertyData = await propertyRes.json();
 
-        if (propertyData.length > 0) {
-          setProperty(propertyData[0]);
-        }
+      if (propertyData.length > 0) {
+        setProperty(propertyData[0]);
 
-        const docRes = await fetch(
-          `/api/properties/documents?property_id=${propertyId}`
-        );
-        const docData = await docRes.json();
+        const meta =
+          propertyData[0].property_meta &&
+          propertyData[0].property_meta !== ""
+            ? JSON.parse(propertyData[0].property_meta)
+            : {};
 
-        if (docData.length > 0) {
-          setDocumentData(docData[0]);
-        }
-      } catch (err) {
-        console.error(err);
+        setMetaData(meta);
+      }
+
+      const docRes = await fetch(
+        `/api/properties/documents?property_id=${propertyId}`
+      );
+      const docData = await docRes.json();
+
+      if (docData.length > 0) {
+        setDocumentData(docData[0]);
       }
     };
 
     fetchData();
   }, [propertyId]);
+
+  /* ================= HANDLERS ================= */
+
+  const handleChange = (e: any) => {
+    if (!property) return;
+    setProperty({
+      ...property,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleMetaChange = (key: string, value: string) => {
+    setMetaData({
+      ...metaData,
+      [key]: value,
+    });
+  };
+
+  const handleImageChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDocumentChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewDocument(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  /* ================= UPDATE ================= */
+
+  const handleUpdate = async () => {
+    if (!property) return;
+
+    setLoading(true);
+
+    try {
+      // 1️⃣ Update Property
+      await fetch("/api/properties/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...property,
+          property_image: newImage || property.property_image,
+          property_meta: JSON.stringify(metaData),
+        }),
+      });
+
+      // 2️⃣ Update Document (if new uploaded)
+      if (newDocument) {
+        await fetch("/api/properties/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            property_id: property.property_id,
+            file_base64: newDocument,
+            document_type: "Updated Document",
+          }),
+        });
+      }
+
+      alert("Property updated successfully");
+      setEditing(false);
+    } catch (error) {
+      console.error(error);
+      alert("Update failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================= DELETE ================= */
 
   const handleDelete = async () => {
     const confirmDelete = confirm(
@@ -65,24 +161,12 @@ export default function PropertyDetailPage() {
 
     if (!confirmDelete) return;
 
-    try {
-      const res = await fetch(
-        `/api/properties/delete?property_id=${propertyId}`,
-        { method: "DELETE" }
-      );
+    await fetch(
+      `/api/properties/delete?property_id=${propertyId}`,
+      { method: "DELETE" }
+    );
 
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Property deleted successfully");
-        router.push("/dashboard/properties");
-      } else {
-        alert(data.error || "Delete failed");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("Something went wrong");
-    }
+    router.push("/dashboard/properties");
   };
 
   if (!property) {
@@ -93,111 +177,184 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const meta =
-    property.property_meta && property.property_meta !== ""
-      ? JSON.parse(property.property_meta)
-      : {};
-return (
-  <div className={styles.pageWrapper}>
-    <div className={styles.propertyContainer}>
-      <div className={styles.propertyCard}>
+  /* ================= UI ================= */
 
-        {/* HEADER */}
-        <div className={styles.propertyHeader}>
-          <h2 className={styles.propertyTitle}>
-            {property.property_name}
-          </h2>
-          <span className={styles.propertyTypeBadge}>
-            {property.property_type}
-          </span>
-        </div>
+  return (
+    <div className={styles.pageWrapper}>
+      <div className={styles.propertyContainer}>
+        <div className={styles.propertyCard}>
 
-        {/* IMAGE */}
-        {property.property_image && (
-          <img
-            src={property.property_image}
-            alt="Property"
-            className={styles.propertyImage}
-          />
-        )}
+          {/* HEADER */}
+          <div className={styles.propertyHeader}>
+            {editing ? (
+              <input
+                name="property_name"
+                value={property.property_name}
+                onChange={handleChange}
+                className={styles.inputField}
+              />
+            ) : (
+              <h2 className={styles.propertyTitle}>
+                {property.property_name}
+              </h2>
+            )}
 
-        {/* LOCATION */}
-        <div className={styles.infoGrid}>
-          <div className={styles.infoCard}>
-            <strong>Location</strong>
-            <p>{property.location}</p>
+            {editing ? (
+              <input
+                name="property_type"
+                value={property.property_type}
+                onChange={handleChange}
+                className={styles.inputField}
+              />
+            ) : (
+              <span className={styles.propertyTypeBadge}>
+                {property.property_type}
+              </span>
+            )}
           </div>
 
-          <div className={styles.infoCard}>
-            <strong>Geo Location</strong>
-            <p>{property.geo_location}</p>
+          {/* IMAGE */}
+          <div>
+            {(newImage || property.property_image) && (
+              <img
+                src={newImage || property.property_image}
+                alt="Property"
+                className={styles.propertyImage}
+              />
+            )}
+
+            {editing && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            )}
           </div>
-        </div>
 
-        <div className={styles.divider} />
+          {/* LOCATION */}
+          <div className={styles.infoGrid}>
+            <div className={styles.infoCard}>
+              <strong>Location</strong>
+              {editing ? (
+                <input
+                  name="location"
+                  value={property.location}
+                  onChange={handleChange}
+                  className={styles.inputField}
+                />
+              ) : (
+                <p>{property.location}</p>
+              )}
+            </div>
 
-        {/* ADDITIONAL DETAILS */}
-        <h3 className={styles.sectionTitle}>
-          Additional Details
-        </h3>
+            <div className={styles.infoCard}>
+              <strong>Geo Location</strong>
+              {editing ? (
+                <input
+                  name="geo_location"
+                  value={property.geo_location}
+                  onChange={handleChange}
+                  className={styles.inputField}
+                />
+              ) : (
+                <p>{property.geo_location}</p>
+              )}
+            </div>
+          </div>
 
-        {Object.entries(meta).length === 0 ? (
-          <p className={styles.emptyText}>
-            No additional details available.
-          </p>
-        ) : (
+          {/* ADDITIONAL DETAILS */}
+          <h3 className={styles.sectionTitle}>
+            Additional Details
+          </h3>
+
           <div className={styles.metaGrid}>
-            {Object.entries(meta).map(([key, value]) => (
+            {Object.entries(metaData).map(([key, value]) => (
               <div key={key} className={styles.metaItem}>
                 <strong>{key}</strong>
-                <p>{value as string}</p>
+
+                {editing ? (
+                  <input
+                    value={value as string}
+                    onChange={(e) =>
+                      handleMetaChange(key, e.target.value)
+                    }
+                    className={styles.inputField}
+                  />
+                ) : (
+                  <p>{value as string}</p>
+                )}
               </div>
             ))}
           </div>
-        )}
 
-        <div className={styles.divider} />
+          {/* DOCUMENT */}
+          <h3 className={styles.sectionTitle}>Document</h3>
 
-        {/* DOCUMENT */}
-        <h3 className={styles.sectionTitle}>Document</h3>
-
-        {!documentData ? (
-          <p className={styles.emptyText}>
-            No document uploaded.
-          </p>
-        ) : (
-          <div className={styles.documentSection}>
-            <p>
-              <strong>Document Type:</strong>{" "}
-              {documentData.document_type}
-            </p>
-
+          {(newDocument || documentData?.file_base64) ? (
             <iframe
-              src={documentData.file_base64}
+              src={newDocument || documentData?.file_base64}
               className={styles.documentFrame}
             />
+          ) : (
+            <p>No document uploaded.</p>
+          )}
+
+          {editing && (
+            <input
+              type="file"
+              accept="application/pdf,image/*"
+              onChange={handleDocumentChange}
+            />
+          )}
+
+          {/* BUTTONS */}
+          <div className={styles.buttonRow}>
+            <button
+              className={styles.secondaryBtn}
+              onClick={() => router.back()}
+            >
+              Back
+            </button>
+
+            {!editing ? (
+              <>
+                <button
+                  className={styles.primaryBtn}
+                  onClick={() => setEditing(true)}
+                >
+                  Edit
+                </button>
+
+                <button
+                  className={styles.dangerBtn}
+                  onClick={handleDelete}
+                >
+                  Delete
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className={styles.primaryBtn}
+                  onClick={handleUpdate}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
+
+                <button
+                  className={styles.secondaryBtn}
+                  onClick={() => setEditing(false)}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
           </div>
-        )}
 
-        {/* BUTTONS */}
-        <div className={styles.buttonRow}>
-          <button
-            className={styles.secondaryBtn}
-            onClick={() => router.back()}
-          >
-            Back
-          </button>
-
-          <button
-            className={styles.dangerBtn}
-            onClick={handleDelete}
-          >
-            Delete Property
-          </button>
         </div>
-
       </div>
     </div>
-  </div>
-);
+  );
 }
