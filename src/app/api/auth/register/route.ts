@@ -15,6 +15,7 @@ export async function POST(req: Request) {
       age,
       gender,
       address,
+      pincode,
       district,
       state,
       profile_pic,   // ✅ ADD THIS
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
       .input("age", sql.Int, age || null)
       .input("gender", sql.NVarChar(50), gender || null)
       .input("address", sql.NVarChar(255), address || null)
+       .input("pincode", sql.VarChar(10), pincode || null)
       .input("district", sql.NVarChar(100), district || null)
       .input("state", sql.NVarChar(100), state || null)
       .input("profile_pic", sql.NVarChar(sql.MAX), profile_pic || null) // ✅ IMPORTANT

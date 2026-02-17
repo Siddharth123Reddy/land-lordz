@@ -46,11 +46,7 @@ export default function DashboardLayout({
         <div className={styles.navLinks}>
           <Link
             href="/dashboard"
-            className={
-              pathname === "/dashboard"
-                ? styles.active
-                : ""
-            }
+            className={pathname === "/dashboard" ? styles.active : ""}
           >
             Dashboard
           </Link>
@@ -68,11 +64,7 @@ export default function DashboardLayout({
 
           <Link
             href="/dashboard/profile"
-            className={
-              pathname === "/dashboard/profile"
-                ? styles.active
-                : ""
-            }
+            className={pathname === "/dashboard/profile" ? styles.active : ""}
           >
             Profile
           </Link>
@@ -80,15 +72,26 @@ export default function DashboardLayout({
 
         {/* RIGHT - Profile */}
         <div className={styles.profileWrapper}>
-          {user && user.profile_pic && (
+          {user && (
             <>
-              <img
-                src={user.profile_pic}
-                alt="Profile"
-                className={styles.profilePic}
-                onClick={() => setOpen(!open)}
-              />
+              {/* Show Image OR Default Avatar */}
+              {user.profile_pic ? (
+                <img
+                  src={user.profile_pic}
+                  alt="Profile"
+                  className={styles.profilePic}
+                  onClick={() => setOpen(!open)}
+                />
+              ) : (
+                <div
+                  className={styles.defaultAvatar}
+                  onClick={() => setOpen(!open)}
+                >
+                  {user.name?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+              )}
 
+              {/* Dropdown */}
               {open && (
                 <div className={styles.dropdown}>
                   <button onClick={handleLogout}>

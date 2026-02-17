@@ -97,11 +97,12 @@ export default function PropertyDetailPage() {
     property.property_meta && property.property_meta !== ""
       ? JSON.parse(property.property_meta)
       : {};
-
-  return (
+return (
+  <div className={styles.pageWrapper}>
     <div className={styles.propertyContainer}>
       <div className={styles.propertyCard}>
 
+        {/* HEADER */}
         <div className={styles.propertyHeader}>
           <h2 className={styles.propertyTitle}>
             {property.property_name}
@@ -111,6 +112,7 @@ export default function PropertyDetailPage() {
           </span>
         </div>
 
+        {/* IMAGE */}
         {property.property_image && (
           <img
             src={property.property_image}
@@ -119,13 +121,14 @@ export default function PropertyDetailPage() {
           />
         )}
 
+        {/* LOCATION */}
         <div className={styles.infoGrid}>
-          <div>
+          <div className={styles.infoCard}>
             <strong>Location</strong>
             <p>{property.location}</p>
           </div>
 
-          <div>
+          <div className={styles.infoCard}>
             <strong>Geo Location</strong>
             <p>{property.geo_location}</p>
           </div>
@@ -133,6 +136,7 @@ export default function PropertyDetailPage() {
 
         <div className={styles.divider} />
 
+        {/* ADDITIONAL DETAILS */}
         <h3 className={styles.sectionTitle}>
           Additional Details
         </h3>
@@ -154,6 +158,7 @@ export default function PropertyDetailPage() {
 
         <div className={styles.divider} />
 
+        {/* DOCUMENT */}
         <h3 className={styles.sectionTitle}>Document</h3>
 
         {!documentData ? (
@@ -174,6 +179,7 @@ export default function PropertyDetailPage() {
           </div>
         )}
 
+        {/* BUTTONS */}
         <div className={styles.buttonRow}>
           <button
             className={styles.secondaryBtn}
@@ -192,5 +198,6 @@ export default function PropertyDetailPage() {
 
       </div>
     </div>
-  );
+  </div>
+);
 }

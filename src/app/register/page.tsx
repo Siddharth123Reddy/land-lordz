@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [address, setAddress] = useState("");
   const [district, setDistrict] = useState("");
   const [stateName, setStateName] = useState("");
+  const [pincode, setPincode] = useState(""); // ✅ NEW
 
   const [preview, setPreview] = useState("");
 
@@ -62,7 +63,7 @@ export default function RegisterPage() {
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      setPreview(reader.result as string); // base64 string
+      setPreview(reader.result as string);
     };
 
     reader.readAsDataURL(file);
@@ -91,7 +92,8 @@ export default function RegisterPage() {
           address: address || null,
           district: district || null,
           state: stateName || null,
-          profile_pic: preview || null, // IMPORTANT
+          pincode: pincode || null, // ✅ ADDED
+          profile_pic: preview || null,
         }),
       });
 
@@ -102,7 +104,8 @@ export default function RegisterPage() {
         return;
       }
 
-      localStorage.setItem("farmerId", data.farmerId);
+      localStorage.setItem("farmer_id", data.farmerId.toString());
+
       router.push("/dashboard");
 
     } catch (error) {
@@ -209,6 +212,15 @@ export default function RegisterPage() {
                 placeholder="State (Optional)"
                 value={stateName}
                 onChange={(e) => setStateName(e.target.value)}
+              />
+
+              {/* ✅ PINCODE FIELD ADDED */}
+              <input
+                className={styles.input}
+                type="number"
+                placeholder="Pincode (Optional)"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
               />
 
               {preview && (

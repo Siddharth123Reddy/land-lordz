@@ -47,6 +47,7 @@ export async function GET(req: Request) {
             property_name,
             property_type,
             location,
+            property_image, 
             created_at
           FROM Properties
           WHERE farmer_id = @farmer_id

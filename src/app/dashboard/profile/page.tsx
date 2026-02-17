@@ -35,10 +35,13 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           farmerId: form.farmer_id,
+          name: form.name,           // ✅ name added
           gender: form.gender,
           age: form.age,
           address: form.address,
           district: form.district,
+          state: form.state,
+          pincode: form.pincode,
         }),
       });
 
@@ -56,9 +59,7 @@ export default function ProfilePage() {
       setEditing(false);
       setOriginal(form);
       window.location.reload();
-
     } catch (err) {
-      console.error(err);
       alert("Update failed");
     } finally {
       setLoading(false);
@@ -73,120 +74,159 @@ export default function ProfilePage() {
   if (!form) return <p>Loading...</p>;
 
   return (
-    <div className={styles.profileContainer}>
-      <div className={styles.profileCard}>
+    <div className={styles.pageWrapper}>
+      <div className={styles.profileContainer}>
+        <div className={styles.profileCard}>
 
-        {/* HEADER */}
-        <div className={styles.profileHeader}>
-          <h2 className={styles.profileTitle}>My Profile</h2>
-          <p className={styles.profileSubtitle}>
-            Manage your personal details and information
-          </p>
-        </div>
-
-        {/* PROFILE IMAGE */}
-        <div className={styles.profileImageSection}>
-          {form.profile_pic && (
-            <img
-              src={form.profile_pic}
-              alt="Profile"
-              className={styles.profileImage}
-            />
-          )}
-
-          {editing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setImageFile(e.target.files?.[0] || null)
-              }
-            />
-          )}
-        </div>
-
-        {/* FORM GRID */}
-        <div className={styles.profileGrid}>
-          <div>
-            <label>Name</label>
-            <input value={form.name} disabled />
+          {/* HEADER */}
+          <div className={styles.profileHeader}>
+            <h2 className={styles.profileTitle}>My Profile</h2>
+            <p className={styles.profileSubtitle}>
+              Manage your personal details and information
+            </p>
           </div>
 
-          <div>
-            <label>Phone</label>
-            <input value={form.contact} disabled />
+          {/* PROFILE IMAGE */}
+          <div className={styles.profileImageSection}>
+            <div className={styles.imageWrapper}>
+              {form.profile_pic && (
+                <img
+                  src={form.profile_pic}
+                  alt="Profile"
+                  className={styles.profileImage}
+                />
+              )}
+
+              {editing && (
+                <label className={styles.editIcon}>
+                  ✎
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setImageFile(e.target.files?.[0] || null)
+                    }
+                  />
+                </label>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label>Gender</label>
-            <input
-              name="gender"
-              value={form.gender || ""}
-              onChange={handleChange}
-              disabled={!editing}
-            />
+          {/* FORM */}
+          <div className={styles.profileGrid}>
+
+            {/* ✅ NAME editable when editing */}
+            <div>
+              <label>Name</label>
+              <input
+                name="name"
+                value={form.name || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            {/* ❌ PHONE always disabled */}
+            <div>
+              <label>Phone</label>
+              <input
+                value={form.contact}
+                disabled
+              />
+            </div>
+
+            <div>
+              <label>Gender</label>
+              <input
+                name="gender"
+                value={form.gender || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            <div>
+              <label>Age</label>
+              <input
+                name="age"
+                value={form.age || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            <div className={styles.fullWidth}>
+              <label>Address</label>
+              <input
+                name="address"
+                value={form.address || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            <div>
+              <label>District</label>
+              <input
+                name="district"
+                value={form.district || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            <div>
+              <label>State</label>
+              <input
+                name="state"
+                value={form.state || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
+            <div>
+              <label>Pincode</label>
+              <input
+                name="pincode"
+                value={form.pincode || ""}
+                onChange={handleChange}
+                disabled={!editing}
+              />
+            </div>
+
           </div>
 
-          <div>
-            <label>Age</label>
-            <input
-              name="age"
-              value={form.age || ""}
-              onChange={handleChange}
-              disabled={!editing}
-            />
-          </div>
-
-          <div className={styles.fullWidth}>
-            <label>Address</label>
-            <input
-              name="address"
-              value={form.address || ""}
-              onChange={handleChange}
-              disabled={!editing}
-            />
-          </div>
-
-          <div>
-            <label>District</label>
-            <input
-              name="district"
-              value={form.district || ""}
-              onChange={handleChange}
-              disabled={!editing}
-            />
-          </div>
-        </div>
-
-        {/* BUTTONS */}
-        <div className={styles.buttonSection}>
-          {!editing ? (
-            <button
-              className={styles.primaryBtn}
-              onClick={() => setEditing(true)}
-            >
-              Edit Profile
-            </button>
-          ) : (
-            <>
+          {/* BUTTONS */}
+          <div className={styles.buttonSection}>
+            {!editing ? (
               <button
                 className={styles.primaryBtn}
-                onClick={handleSave}
-                disabled={loading}
+                onClick={() => setEditing(true)}
               >
-                {loading ? "Saving..." : "Save Changes"}
+                Edit Profile
               </button>
+            ) : (
+              <>
+                <button
+                  className={styles.primaryBtn}
+                  onClick={handleSave}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
 
-              <button
-                className={styles.secondaryBtn}
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            </>
-          )}
+                <button
+                  className={styles.secondaryBtn}
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+
         </div>
-
       </div>
     </div>
   );

@@ -32,6 +32,7 @@ export async function GET(req: Request) {
           address,
           district,
           state,
+          pincode,
           profile_pic
         FROM dbo.Farmers
         WHERE farmer_id = @farmer_id
@@ -63,13 +64,7 @@ export async function PUT(req: Request) {
   try {
     const body = await req.json();
 
-    const {
-      farmerId,
-      gender,
-      age,
-      address,
-      district
-    } = body;
+    const farmerId = Number(body.farmerId);
 
     if (!farmerId) {
       return NextResponse.json(
@@ -80,20 +75,25 @@ export async function PUT(req: Request) {
 
     const db = await getDb();
 
-    await db
-      .request()
-      .input("farmer_id", sql.Int, Number(farmerId))
-      .input("gender", sql.VarChar(50), gender)
-      .input("age", sql.Int, Number(age))
-      .input("address", sql.VarChar(255), address)
-      .input("district", sql.VarChar(100), district)
+    await db.request()
+      .input("farmer_id", sql.Int, farmerId)
+      .input("name", sql.VarChar(150), body.name || null) // ✅ ADDED
+      .input("gender", sql.VarChar(50), body.gender || null)
+      .input("age", sql.Int, body.age ? Number(body.age) : null)
+      .input("address", sql.VarChar(255), body.address || null)
+      .input("district", sql.VarChar(100), body.district || null)
+      .input("state", sql.VarChar(100), body.state || null)
+      .input("pincode", sql.VarChar(10), body.pincode || null)
       .query(`
         UPDATE dbo.Farmers
         SET 
+          name = @name,              -- ✅ ADDED
           gender = @gender,
           age = @age,
           address = @address,
-          district = @district
+          district = @district,
+          state = @state,
+          pincode = @pincode
         WHERE farmer_id = @farmer_id
       `);
 

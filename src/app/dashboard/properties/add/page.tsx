@@ -217,10 +217,26 @@ export default function AddPropertyPage() {
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
             >
-              <option value="">Select Document Type</option>
-              <option value="Title Deed">Title Deed</option>
-              <option value="Sale Agreement">Sale Agreement</option>
-              <option value="Lease Agreement">Lease Agreement</option>
+            <option value="">Select Document Type</option>
+  <option value="Title Deed">Title Deed</option>
+  <option value="Sale Agreement">Sale Agreement</option>
+  <option value="Lease Agreement">Lease Agreement</option>
+  <option value="Encumbrance Certificate">Encumbrance Certificate</option>
+  <option value="Property Tax Receipts">Property Tax Receipts</option>
+  <option value="Khata Certificate">Khata Certificate</option>
+  <option value="Khata Extract">Khata Extract</option>
+  <option value="Land Record">Land Record</option>
+  <option value="No Objection Certificate (NOC)">No Objection Certificate (NOC)</option>
+  <option value="Building Plan Approval">Building Plan Approval</option>
+  <option value="Occupancy Certificate">Occupancy Certificate</option>
+  <option value="Possession Certificate">Possession Certificate</option>
+  <option value="GST Registration">GST Registration</option>
+  <option value="Commercial License">Commercial License</option>
+  <option value="Trade License">Trade License</option>
+  <option value="Electricity and Water Bill Receipts">
+    Electricity and Water Bill Receipts
+  </option>
+
             </select>
 
             <input
