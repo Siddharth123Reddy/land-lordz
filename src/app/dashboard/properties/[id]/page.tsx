@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import styles from "../../dashboard.module.css";
 
 type Property = {
   property_id: number;
@@ -32,7 +33,6 @@ export default function PropertyDetailPage() {
 
     const fetchData = async () => {
       try {
-        // PROPERTY
         const propertyRes = await fetch(
           `/api/properties/list?property_id=${propertyId}`
         );
@@ -42,7 +42,6 @@ export default function PropertyDetailPage() {
           setProperty(propertyData[0]);
         }
 
-        // DOCUMENT
         const docRes = await fetch(
           `/api/properties/documents?property_id=${propertyId}`
         );
@@ -86,7 +85,13 @@ export default function PropertyDetailPage() {
     }
   };
 
-  if (!property) return <div>Loading...</div>;
+  if (!property) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Loading property details...</p>
+      </div>
+    );
+  }
 
   const meta =
     property.property_meta && property.property_meta !== ""
@@ -94,89 +99,98 @@ export default function PropertyDetailPage() {
       : {};
 
   return (
-    <div style={{ padding: 30 }}>
-      <h2>{property.property_name}</h2>
+    <div className={styles.propertyContainer}>
+      <div className={styles.propertyCard}>
 
-      {/* IMAGE */}
-      {property.property_image && (
-        <img
-          src={property.property_image}
-          alt="Property"
-          style={{
-            width: "100%",
-            height: 300,
-            objectFit: "cover",
-            borderRadius: 10,
-            marginBottom: 20,
-          }}
-        />
-      )}
+        <div className={styles.propertyHeader}>
+          <h2 className={styles.propertyTitle}>
+            {property.property_name}
+          </h2>
+          <span className={styles.propertyTypeBadge}>
+            {property.property_type}
+          </span>
+        </div>
 
-      <p>
-        <strong>Type:</strong> {property.property_type}
-      </p>
-      <p>
-        <strong>Location:</strong> {property.location}
-      </p>
-      <p>
-        <strong>Geo Location:</strong> {property.geo_location}
-      </p>
-
-      <hr />
-
-      <h3>Additional Details</h3>
-
-      {Object.entries(meta).length === 0 && (
-        <p>No additional details.</p>
-      )}
-
-      {Object.entries(meta).map(([key, value]) => (
-        <p key={key}>
-          <strong>{key}:</strong> {value as string}
-        </p>
-      ))}
-
-      <hr />
-
-      <h3>Document</h3>
-
-      {!documentData && <p>No document found.</p>}
-
-      {documentData && (
-        <>
-          <p>
-            <strong>Type:</strong> {documentData.document_type}
-          </p>
-
-          <iframe
-            src={documentData.file_base64}
-            width="100%"
-            height="500px"
-            style={{ border: "none", borderRadius: 10 }}
+        {property.property_image && (
+          <img
+            src={property.property_image}
+            alt="Property"
+            className={styles.propertyImage}
           />
-        </>
-      )}
+        )}
 
-      <br />
+        <div className={styles.infoGrid}>
+          <div>
+            <strong>Location</strong>
+            <p>{property.location}</p>
+          </div>
 
-      <button onClick={() => router.back()}>
-        Back
-      </button>
+          <div>
+            <strong>Geo Location</strong>
+            <p>{property.geo_location}</p>
+          </div>
+        </div>
 
-      <button
-        onClick={handleDelete}
-        style={{
-          marginLeft: 10,
-          background: "red",
-          color: "white",
-          padding: "8px 16px",
-          border: "none",
-          borderRadius: 6,
-          cursor: "pointer",
-        }}
-      >
-        Delete Property
-      </button>
+        <div className={styles.divider} />
+
+        <h3 className={styles.sectionTitle}>
+          Additional Details
+        </h3>
+
+        {Object.entries(meta).length === 0 ? (
+          <p className={styles.emptyText}>
+            No additional details available.
+          </p>
+        ) : (
+          <div className={styles.metaGrid}>
+            {Object.entries(meta).map(([key, value]) => (
+              <div key={key} className={styles.metaItem}>
+                <strong>{key}</strong>
+                <p>{value as string}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className={styles.divider} />
+
+        <h3 className={styles.sectionTitle}>Document</h3>
+
+        {!documentData ? (
+          <p className={styles.emptyText}>
+            No document uploaded.
+          </p>
+        ) : (
+          <div className={styles.documentSection}>
+            <p>
+              <strong>Document Type:</strong>{" "}
+              {documentData.document_type}
+            </p>
+
+            <iframe
+              src={documentData.file_base64}
+              className={styles.documentFrame}
+            />
+          </div>
+        )}
+
+        <div className={styles.buttonRow}>
+          <button
+            className={styles.secondaryBtn}
+            onClick={() => router.back()}
+          >
+            Back
+          </button>
+
+          <button
+            className={styles.dangerBtn}
+            onClick={handleDelete}
+          >
+            Delete Property
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }

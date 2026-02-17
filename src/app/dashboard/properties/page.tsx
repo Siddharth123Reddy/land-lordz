@@ -45,16 +45,25 @@ export default function PropertiesPage() {
   }, [router]);
 
   if (loading) {
-    return <p>Loading properties...</p>;
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Loading properties...</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
-        <h2>My Properties</h2>
+        <div>
+          <h2 className={styles.pageTitle}>My Properties</h2>
+          <p className={styles.pageSubtitle}>
+            Manage and view all your registered lands
+          </p>
+        </div>
 
         <button
-          className={styles.primaryButton}
+          className={styles.primaryBtn}
           onClick={() =>
             router.push("/dashboard/properties/add")
           }
@@ -65,7 +74,9 @@ export default function PropertiesPage() {
 
       <div className={styles.propertyGrid}>
         {properties.length === 0 && (
-          <p>No properties found.</p>
+          <p className={styles.emptyText}>
+            No properties found.
+          </p>
         )}
 
         {properties.map((property) => (
@@ -77,7 +88,6 @@ export default function PropertiesPage() {
                 `/dashboard/properties/${property.property_id}`
               )
             }
-            style={{ cursor: "pointer" }}
           >
             <img
               src={

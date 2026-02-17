@@ -23,7 +23,6 @@ export default function DashboardLayout({
     fetch(`/api/farmer/profile?farmerId=${farmerId}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("PROFILE DATA:", data);
         setUser(data);
       })
       .catch((err) => console.error(err));
@@ -47,7 +46,11 @@ export default function DashboardLayout({
         <div className={styles.navLinks}>
           <Link
             href="/dashboard"
-            className={pathname === "/dashboard" ? styles.active : ""}
+            className={
+              pathname === "/dashboard"
+                ? styles.active
+                : ""
+            }
           >
             Dashboard
           </Link>
@@ -55,7 +58,9 @@ export default function DashboardLayout({
           <Link
             href="/dashboard/properties"
             className={
-              pathname === "/dashboard/properties" ? styles.active : ""
+              pathname.startsWith("/dashboard/properties")
+                ? styles.active
+                : ""
             }
           >
             Properties
@@ -64,7 +69,9 @@ export default function DashboardLayout({
           <Link
             href="/dashboard/profile"
             className={
-              pathname === "/dashboard/profile" ? styles.active : ""
+              pathname === "/dashboard/profile"
+                ? styles.active
+                : ""
             }
           >
             Profile
@@ -76,7 +83,7 @@ export default function DashboardLayout({
           {user && user.profile_pic && (
             <>
               <img
-                src={user.profile_pic}  
+                src={user.profile_pic}
                 alt="Profile"
                 className={styles.profilePic}
                 onClick={() => setOpen(!open)}
@@ -84,7 +91,9 @@ export default function DashboardLayout({
 
               {open && (
                 <div className={styles.dropdown}>
-                  <button onClick={handleLogout}>Logout</button>
+                  <button onClick={handleLogout}>
+                    Logout
+                  </button>
                 </div>
               )}
             </>
@@ -92,7 +101,9 @@ export default function DashboardLayout({
         </div>
       </nav>
 
-      <main className={styles.mainContent}>{children}</main>
+      <main className={styles.mainContent}>
+        {children}
+      </main>
     </>
   );
 }

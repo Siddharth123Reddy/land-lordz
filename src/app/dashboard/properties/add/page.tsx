@@ -62,9 +62,6 @@ export default function AddPropertyPage() {
     try {
       const propertyMeta = JSON.stringify(answers);
 
-      /* =============================
-         1️⃣ CREATE PROPERTY
-      ============================= */
       const res = await fetch("/api/properties/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,9 +86,6 @@ export default function AddPropertyPage() {
 
       const propertyId = result.property_id;
 
-      /* =============================
-         2️⃣ UPLOAD DOCUMENT
-      ============================= */
       if (documentType && documentBase64) {
         await fetch("/api/properties/documents", {
           method: "POST",
@@ -116,114 +110,137 @@ export default function AddPropertyPage() {
   };
 
   return (
-    <div className={styles.formContainer}>
-      <h2 className={styles.title}>Add Property</h2>
+    <div className={styles.formPageContainer}>
+      <div className={styles.formCard}>
+        <h2 className={styles.formTitle}>Add New Property</h2>
 
-      {step === 1 && (
-        <>
-          <h3>Select Property Type</h3>
-          {["Agricultural", "Residential", "Commercial", "Industrial"].map(
-            (type) => (
-              <button
-                key={type}
-                className={styles.button}
-                onClick={() => {
-                  setPropertyType(type as PropertyType);
-                  setStep(2);
-                }}
-              >
-                {type}
-              </button>
-            )
-          )}
-        </>
-      )}
+        {/* STEP 1 */}
+        {step === 1 && (
+          <div className={styles.stepSection}>
+            <h3>Select Property Type</h3>
+            <div className={styles.typeGrid}>
+              {["Agricultural", "Residential", "Commercial", "Industrial"].map(
+                (type) => (
+                  <button
+                    key={type}
+                    className={styles.typeButton}
+                    onClick={() => {
+                      setPropertyType(type as PropertyType);
+                      setStep(2);
+                    }}
+                  >
+                    {type}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+        )}
 
-      {step === 2 && (
-        <>
-          <input
-            className={styles.input}
-            placeholder="Property Name"
-            value={propertyName}
-            onChange={(e) => setPropertyName(e.target.value)}
-          />
-
-          <input
-            className={styles.input}
-            placeholder="Location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-
-          <input
-            className={styles.input}
-            placeholder="Geo Location"
-            value={geoLocation}
-            onChange={(e) => setGeoLocation(e.target.value)}
-          />
-
-          {questions.map((q) => (
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div className={styles.stepSection}>
             <input
-              key={q.key}
               className={styles.input}
-              placeholder={q.label}
-              value={answers[q.key] || ""}
+              placeholder="Property Name"
+              value={propertyName}
+              onChange={(e) => setPropertyName(e.target.value)}
+            />
+
+            <input
+              className={styles.input}
+              placeholder="Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+
+            <input
+              className={styles.input}
+              placeholder="Geo Location"
+              value={geoLocation}
+              onChange={(e) => setGeoLocation(e.target.value)}
+            />
+
+            {questions.map((q) => (
+              <input
+                key={q.key}
+                className={styles.input}
+                placeholder={q.label}
+                value={answers[q.key] || ""}
+                onChange={(e) =>
+                  setAnswers({
+                    ...answers,
+                    [q.key]: e.target.value,
+                  })
+                }
+              />
+            ))}
+
+            <button
+              className={styles.primaryBtn}
+              onClick={() => setStep(3)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+
+        {/* STEP 3 */}
+        {step === 3 && (
+          <div className={styles.stepSection}>
+            <label className={styles.fileLabel}>
+              Upload Property Image
+            </label>
+
+            <input
+              type="file"
               onChange={(e) =>
-                setAnswers({
-                  ...answers,
-                  [q.key]: e.target.value,
-                })
+                e.target.files &&
+                handleFileUpload(e.target.files[0], "property")
               }
             />
-          ))}
 
-          <button className={styles.button} onClick={() => setStep(3)}>
-            Next
-          </button>
-        </>
-      )}
+            <button
+              className={styles.primaryBtn}
+              onClick={() => setStep(4)}
+            >
+              Next
+            </button>
+          </div>
+        )}
 
-      {step === 3 && (
-        <>
-          <input
-            type="file"
-            onChange={(e) =>
-              e.target.files &&
-              handleFileUpload(e.target.files[0], "property")
-            }
-          />
-          <button className={styles.button} onClick={() => setStep(4)}>
-            Next
-          </button>
-        </>
-      )}
+        {/* STEP 4 */}
+        {step === 4 && (
+          <div className={styles.stepSection}>
+            <select
+              className={styles.input}
+              value={documentType}
+              onChange={(e) => setDocumentType(e.target.value)}
+            >
+              <option value="">Select Document Type</option>
+              <option value="Title Deed">Title Deed</option>
+              <option value="Sale Agreement">Sale Agreement</option>
+              <option value="Lease Agreement">Lease Agreement</option>
+            </select>
 
-      {step === 4 && (
-        <>
-          <select
-            className={styles.input}
-            value={documentType}
-            onChange={(e) => setDocumentType(e.target.value)}
-          >
-            <option value="">Select Document Type</option>
-            <option value="Title Deed">Title Deed</option>
-            <option value="Sale Agreement">Sale Agreement</option>
-            <option value="Lease Agreement">Lease Agreement</option>
-          </select>
+            <input
+              type="file"
+              onChange={(e) =>
+                e.target.files &&
+                handleFileUpload(e.target.files[0], "document")
+              }
+            />
 
-          <input
-            type="file"
-            onChange={(e) =>
-              e.target.files &&
-              handleFileUpload(e.target.files[0], "document")
-            }
-          />
-
-          <button className={styles.button} onClick={handleSave}>
-            {loading ? "Saving..." : "Save Property"}
-          </button>
-        </>
-      )}
+            <button
+              className={styles.primaryBtn}
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save Property"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -75,9 +75,16 @@ export default function ProfilePage() {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.profileCard}>
-        <h2 className={styles.profileTitle}>Profile</h2>
 
-        {/* Profile Image */}
+        {/* HEADER */}
+        <div className={styles.profileHeader}>
+          <h2 className={styles.profileTitle}>My Profile</h2>
+          <p className={styles.profileSubtitle}>
+            Manage your personal details and information
+          </p>
+        </div>
+
+        {/* PROFILE IMAGE */}
         <div className={styles.profileImageSection}>
           {form.profile_pic && (
             <img
@@ -98,6 +105,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* FORM GRID */}
         <div className={styles.profileGrid}>
           <div>
             <label>Name</label>
@@ -150,6 +158,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* BUTTONS */}
         <div className={styles.buttonSection}>
           {!editing ? (
             <button
@@ -165,7 +174,7 @@ export default function ProfilePage() {
                 onClick={handleSave}
                 disabled={loading}
               >
-                {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save Changes"}
               </button>
 
               <button
@@ -177,6 +186,7 @@ export default function ProfilePage() {
             </>
           )}
         </div>
+
       </div>
     </div>
   );
