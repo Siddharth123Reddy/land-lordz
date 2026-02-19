@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./dashboard.module.css";
@@ -14,6 +14,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<any>(null);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const farmerId = localStorage.getItem("farmer_id");
@@ -25,12 +26,12 @@ export default function DashboardLayout({
       .then((data) => {
         setUser(data);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error("Profile fetch error:", err));
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("farmer_id");
-    window.location.href = "/";
+    router.push("/");
   };
 
   return (
@@ -62,9 +63,25 @@ export default function DashboardLayout({
             Properties
           </Link>
 
+          {/* ✅ NEW CALCULATOR LINK */}
+          <Link
+            href="/dashboard/calculator"
+            className={
+              pathname === "/dashboard/calculator"
+                ? styles.active
+                : ""
+            }
+          >
+            Calculator
+          </Link>
+
           <Link
             href="/dashboard/profile"
-            className={pathname === "/dashboard/profile" ? styles.active : ""}
+            className={
+              pathname === "/dashboard/profile"
+                ? styles.active
+                : ""
+            }
           >
             Profile
           </Link>
@@ -74,7 +91,6 @@ export default function DashboardLayout({
         <div className={styles.profileWrapper}>
           {user && (
             <>
-              {/* Show Image OR Default Avatar */}
               {user.profile_pic ? (
                 <img
                   src={user.profile_pic}
@@ -91,7 +107,6 @@ export default function DashboardLayout({
                 </div>
               )}
 
-              {/* Dropdown */}
               {open && (
                 <div className={styles.dropdown}>
                   <button onClick={handleLogout}>

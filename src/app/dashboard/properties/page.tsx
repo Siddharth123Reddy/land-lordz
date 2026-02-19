@@ -25,25 +25,39 @@ export default function PropertiesPage() {
       return;
     }
 
-    const fetchData = async () => {
+    const fetchProperties = async () => {
       try {
         const res = await fetch(
           `/api/properties/list?farmer_id=${farmerId}`
         );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch properties");
+        }
+
         const data = await res.json();
 
-        setProperties(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Fetch error:", err);
+        console.log("API Response:", data);
+
+        if (data.success && Array.isArray(data.properties)) {
+          setProperties(data.properties);
+        } else {
+          setProperties([]);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
         setProperties([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProperties();
   }, [router]);
 
+  /* ===============================
+     Loading State
+  =============================== */
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -52,6 +66,9 @@ export default function PropertiesPage() {
     );
   }
 
+  /* ===============================
+     UI
+  =============================== */
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
@@ -64,60 +81,55 @@ export default function PropertiesPage() {
 
         <button
           className={styles.primaryBtn}
-          onClick={() =>
-            router.push("/dashboard/properties/add")
-          }
+          onClick={() => router.push("/dashboard/properties/add")}
         >
           + Add Property
         </button>
       </div>
 
       <div className={styles.propertyGrid}>
-        {properties.length === 0 && (
+        {properties.length === 0 ? (
           <p className={styles.emptyText}>
             No properties found.
           </p>
-        )}
-
-        {properties.map((property) => (
-          <div
-            key={property.property_id}
-            className={styles.propertyCard}
-            onClick={() =>
-              router.push(
-                `/dashboard/properties/${property.property_id}`
-              )
-            }
-          >
-            <img
-              src={
-                property.property_image &&
-                property.property_image.startsWith("data:image")
-                  ? property.property_image
-                  : "/no-image.png"
+        ) : (
+          properties.map((property) => (
+            <div
+              key={property.property_id}
+              className={styles.propertyCard}
+              onClick={() =>
+                router.push(
+                  `/dashboard/properties/${property.property_id}`
+                )
               }
-              alt="Property"
-              className={styles.propertyImage}
-            />
+            >
+              <img
+                src={
+                  property.property_image &&
+                  property.property_image.startsWith("data:image")
+                    ? property.property_image
+                    : "/no-image.png"
+                }
+                alt="Property"
+                className={styles.propertyImage}
+              />
 
-            <div className={styles.propertyContent}>
-              <h3>
-                {property.property_name ||
-                  "Unnamed Property"}
-              </h3>
+              <div className={styles.propertyContent}>
+                <h3>
+                  {property.property_name || "Unnamed Property"}
+                </h3>
 
-              <p>
-                {property.property_type ||
-                  "No Type"}
-              </p>
+                <p>
+                  {property.property_type || "No Type"}
+                </p>
 
-              <span>
-                {property.location ||
-                  "No Location"}
-              </span>
+                <span>
+                  {property.location || "No Location"}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

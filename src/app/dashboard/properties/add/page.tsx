@@ -19,6 +19,8 @@ export default function AddPropertyPage() {
   const [propertyType, setPropertyType] = useState<PropertyType>("");
   const [propertyName, setPropertyName] = useState("");
   const [location, setLocation] = useState("");
+  const [stateName, setStateName] = useState("");
+  const [districtName, setDistrictName] = useState("");
   const [geoLocation, setGeoLocation] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [imageBase64, setImageBase64] = useState("");
@@ -43,6 +45,14 @@ export default function AddPropertyPage() {
     reader.readAsDataURL(file);
   };
 
+  const handleBack = () => {
+    if (step === 1) {
+      router.back();
+    } else {
+      setStep(step - 1);
+    }
+  };
+
   const handleSave = async () => {
     const farmer_id = localStorage.getItem("farmer_id");
 
@@ -52,8 +62,8 @@ export default function AddPropertyPage() {
       return;
     }
 
-    if (!propertyName || !propertyType || !location) {
-      alert("Please fill required fields");
+    if (!propertyName || !propertyType || !location || !stateName || !districtName) {
+      alert("Please fill all required fields");
       return;
     }
 
@@ -70,6 +80,8 @@ export default function AddPropertyPage() {
           property_name: propertyName,
           property_type: propertyType,
           location,
+          state: stateName,
+          district: districtName,
           geo_location: geoLocation,
           property_image: imageBase64,
           property_meta: propertyMeta,
@@ -112,9 +124,15 @@ export default function AddPropertyPage() {
   return (
     <div className={styles.formPageContainer}>
       <div className={styles.formCard}>
-        <h2 className={styles.formTitle}>Add New Property</h2>
 
-        {/* STEP 1 */}
+        <button className={styles.arrowBack} onClick={handleBack}>
+          ←
+        </button>
+
+        <h2 className={styles.formTitle}>
+          {propertyType ? `${propertyType} Property` : "Add New Property"}
+        </h2>
+
         {step === 1 && (
           <div className={styles.stepSection}>
             <h3>Select Property Type</h3>
@@ -137,26 +155,29 @@ export default function AddPropertyPage() {
           </div>
         )}
 
-        {/* STEP 2 */}
         {step === 2 && (
           <div className={styles.stepSection}>
-            <input
-              className={styles.input}
-              placeholder="Property Name"
+            <input className={styles.input} placeholder="Property Name"
               value={propertyName}
               onChange={(e) => setPropertyName(e.target.value)}
             />
 
-            <input
-              className={styles.input}
-              placeholder="Location"
+            <input className={styles.input} placeholder="Location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
 
-            <input
-              className={styles.input}
-              placeholder="Geo Location"
+            <input className={styles.input} placeholder="State"
+              value={stateName}
+              onChange={(e) => setStateName(e.target.value)}
+            />
+
+            <input className={styles.input} placeholder="District"
+              value={districtName}
+              onChange={(e) => setDistrictName(e.target.value)}
+            />
+
+            <input className={styles.input} placeholder="Geo Location"
               value={geoLocation}
               onChange={(e) => setGeoLocation(e.target.value)}
             />
@@ -176,22 +197,15 @@ export default function AddPropertyPage() {
               />
             ))}
 
-            <button
-              className={styles.primaryBtn}
-              onClick={() => setStep(3)}
-            >
-              Next
+            <button className={styles.primaryBtn} onClick={() => setStep(3)}>
+              Next →
             </button>
           </div>
         )}
 
-        {/* STEP 3 */}
         {step === 3 && (
           <div className={styles.stepSection}>
-            <label className={styles.fileLabel}>
-              Upload Property Image
-            </label>
-
+            <label className={styles.fileLabel}>Upload Property Image</label>
             <input
               type="file"
               onChange={(e) =>
@@ -199,17 +213,12 @@ export default function AddPropertyPage() {
                 handleFileUpload(e.target.files[0], "property")
               }
             />
-
-            <button
-              className={styles.primaryBtn}
-              onClick={() => setStep(4)}
-            >
-              Next
+            <button className={styles.primaryBtn} onClick={() => setStep(4)}>
+              Next →
             </button>
           </div>
         )}
 
-        {/* STEP 4 */}
         {step === 4 && (
           <div className={styles.stepSection}>
             <select
@@ -217,26 +226,10 @@ export default function AddPropertyPage() {
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
             >
-            <option value="">Select Document Type</option>
-  <option value="Title Deed">Title Deed</option>
-  <option value="Sale Agreement">Sale Agreement</option>
-  <option value="Lease Agreement">Lease Agreement</option>
-  <option value="Encumbrance Certificate">Encumbrance Certificate</option>
-  <option value="Property Tax Receipts">Property Tax Receipts</option>
-  <option value="Khata Certificate">Khata Certificate</option>
-  <option value="Khata Extract">Khata Extract</option>
-  <option value="Land Record">Land Record</option>
-  <option value="No Objection Certificate (NOC)">No Objection Certificate (NOC)</option>
-  <option value="Building Plan Approval">Building Plan Approval</option>
-  <option value="Occupancy Certificate">Occupancy Certificate</option>
-  <option value="Possession Certificate">Possession Certificate</option>
-  <option value="GST Registration">GST Registration</option>
-  <option value="Commercial License">Commercial License</option>
-  <option value="Trade License">Trade License</option>
-  <option value="Electricity and Water Bill Receipts">
-    Electricity and Water Bill Receipts
-  </option>
-
+              <option value="">Select Document Type</option>
+              <option value="Title Deed">Title Deed</option>
+              <option value="Sale Agreement">Sale Agreement</option>
+              <option value="Lease Agreement">Lease Agreement</option>
             </select>
 
             <input

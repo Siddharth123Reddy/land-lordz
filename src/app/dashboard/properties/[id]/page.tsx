@@ -9,6 +9,8 @@ type Property = {
   property_name: string;
   property_type: string;
   location: string;
+  STATE: string;
+  DISTRICT: string;
   geo_location: string;
   property_image: string;
   property_meta: string;
@@ -25,8 +27,7 @@ export default function PropertyDetailPage() {
   const propertyId = params.id as string;
 
   const [property, setProperty] = useState<Property | null>(null);
-  const [documentData, setDocumentData] =
-    useState<DocumentType | null>(null);
+  const [documentData, setDocumentData] = useState<DocumentType | null>(null);
 
   const [metaData, setMetaData] = useState<any>({});
   const [editing, setEditing] = useState(false);
@@ -41,30 +42,38 @@ export default function PropertyDetailPage() {
     if (!propertyId) return;
 
     const fetchData = async () => {
-      const propertyRes = await fetch(
-        `/api/properties/list?property_id=${propertyId}`
-      );
-      const propertyData = await propertyRes.json();
+      try {
+        const propertyRes = await fetch(
+          `/api/properties/list?property_id=${propertyId}`
+        );
+        const propertyData = await propertyRes.json();
 
-      if (propertyData.length > 0) {
-        setProperty(propertyData[0]);
+        if (propertyData.success && propertyData.property) {
+          const prop = propertyData.property;
+          setProperty(prop);
 
-        const meta =
-          propertyData[0].property_meta &&
-          propertyData[0].property_meta !== ""
-            ? JSON.parse(propertyData[0].property_meta)
-            : {};
+          let meta = {};
+          if (prop.property_meta) {
+            try {
+              meta = JSON.parse(prop.property_meta);
+            } catch {
+              meta = {};
+            }
+          }
+          setMetaData(meta);
+        }
 
-        setMetaData(meta);
-      }
+        const docRes = await fetch(
+          `/api/properties/documents?property_id=${propertyId}`
+        );
+        const docData = await docRes.json();
 
-      const docRes = await fetch(
-        `/api/properties/documents?property_id=${propertyId}`
-      );
-      const docData = await docRes.json();
+        if (Array.isArray(docData) && docData.length > 0) {
+          setDocumentData(docData[0]);
+        }
 
-      if (docData.length > 0) {
-        setDocumentData(docData[0]);
+      } catch (error) {
+        console.error("Fetch error:", error);
       }
     };
 
@@ -118,7 +127,6 @@ export default function PropertyDetailPage() {
     setLoading(true);
 
     try {
-      // 1️⃣ Update Property
       await fetch("/api/properties/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -129,7 +137,6 @@ export default function PropertyDetailPage() {
         }),
       });
 
-      // 2️⃣ Update Document (if new uploaded)
       if (newDocument) {
         await fetch("/api/properties/documents", {
           method: "POST",
@@ -155,11 +162,7 @@ export default function PropertyDetailPage() {
   /* ================= DELETE ================= */
 
   const handleDelete = async () => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this property?"
-    );
-
-    if (!confirmDelete) return;
+    if (!confirm("Are you sure you want to delete this property?")) return;
 
     await fetch(
       `/api/properties/delete?property_id=${propertyId}`,
@@ -214,65 +217,48 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* IMAGE */}
-          <div>
-            {(newImage || property.property_image) && (
-              <img
-                src={newImage || property.property_image}
-                alt="Property"
-                className={styles.propertyImage}
-              />
-            )}
+          {(newImage || property.property_image) && (
+            <img
+              src={newImage || property.property_image}
+              alt="Property"
+              className={styles.propertyImage}
+            />
+          )}
 
-            {editing && (
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            )}
-          </div>
+          {editing && (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          )}
 
-          {/* LOCATION */}
+          {/* INFO GRID */}
           <div className={styles.infoGrid}>
-            <div className={styles.infoCard}>
-              <strong>Location</strong>
-              {editing ? (
-                <input
-                  name="location"
-                  value={property.location}
-                  onChange={handleChange}
-                  className={styles.inputField}
-                />
-              ) : (
-                <p>{property.location}</p>
-              )}
-            </div>
-
-            <div className={styles.infoCard}>
-              <strong>Geo Location</strong>
-              {editing ? (
-                <input
-                  name="geo_location"
-                  value={property.geo_location}
-                  onChange={handleChange}
-                  className={styles.inputField}
-                />
-              ) : (
-                <p>{property.geo_location}</p>
-              )}
-            </div>
+            {["location", "STATE", "DISTRICT", "geo_location"].map((field) => (
+              <div key={field} className={styles.infoCard}>
+                <strong>{field}</strong>
+                {editing ? (
+                  <input
+                    name={field}
+                    value={(property as any)[field] || ""}
+                    onChange={handleChange}
+                    className={styles.inputField}
+                  />
+                ) : (
+                  <p>{(property as any)[field]}</p>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* ADDITIONAL DETAILS */}
-          <h3 className={styles.sectionTitle}>
-            Additional Details
-          </h3>
+          {/* META DATA */}
+          <h3 className={styles.sectionTitle}>Additional Details</h3>
 
           <div className={styles.metaGrid}>
             {Object.entries(metaData).map(([key, value]) => (
               <div key={key} className={styles.metaItem}>
                 <strong>{key}</strong>
-
                 {editing ? (
                   <input
                     value={value as string}

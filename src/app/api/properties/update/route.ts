@@ -11,6 +11,8 @@ export async function PUT(req: Request) {
       property_name,
       property_type,
       location,
+      STATE,
+      DISTRICT,
       geo_location,
       property_image,
       property_meta,
@@ -23,6 +25,8 @@ export async function PUT(req: Request) {
       .input("property_name", sql.VarChar(150), property_name)
       .input("property_type", sql.VarChar(100), property_type)
       .input("location", sql.VarChar(150), location)
+      .input("STATE", sql.VarChar(100), STATE)
+      .input("DISTRICT", sql.VarChar(100), DISTRICT)
       .input("geo_location", sql.VarChar(255), geo_location)
       .input("property_image", sql.NVarChar(sql.MAX), property_image)
       .input("property_meta", sql.NVarChar(sql.MAX), property_meta)
@@ -32,6 +36,8 @@ export async function PUT(req: Request) {
           property_name = @property_name,
           property_type = @property_type,
           location = @location,
+          STATE = @STATE,
+          DISTRICT = @DISTRICT,
           geo_location = @geo_location,
           property_image = @property_image,
           property_meta = @property_meta
