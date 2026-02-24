@@ -24,7 +24,7 @@ export default function HomePage() {
               height={40}
               priority
             />
-            <span className="logo-text">LAND-LORDZ</span>
+            <span className="logo-text">LANDLORDZ</span>
           </div>
 
           <ul className="nav-links">
@@ -58,7 +58,7 @@ export default function HomePage() {
 
         <div className="hero-overlay">
           <div className="hero-content">
-            <h1 className="hero-title">LAND-LORDZ</h1>
+            <h1 className="hero-title">LANDLORDZ</h1>
 
             <h2 className="hero-subtitle">
               Smart, Data-Driven Decisions for Profitable Farming
@@ -95,7 +95,7 @@ export default function HomePage() {
         <div className="about-container">
           <div className="about-header">
             <h2 className="about-title">
-              About <span>LAND-LORDZ</span>
+              About <span>LANDLORDZ</span>
             </h2>
             <p className="about-subtitle">
               Transforming raw land data into intelligent agricultural insights
@@ -132,7 +132,7 @@ export default function HomePage() {
           </div>
 
           <div className="mission-box">
-            LAND-LORDZ helps farmers transition from experience-based guesswork
+            LANDLORDZ helps farmers transition from experience-based guesswork
             to data-driven precision farming.
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function HomePage() {
             </h2>
 
             <p className="services-intro">
-              LAND-LORDZ transforms land and environmental data into
+              LANDLORDZ transforms land and environmental data into
               actionable insights, helping farmers make smarter,
               profitable, and sustainable agricultural decisions.
             </p>
@@ -198,7 +198,7 @@ export default function HomePage() {
         <div className="workflow-container">
           <div className="workflow-header">
             <h2 className="workflow-title">
-              How <span>LAND-LORDZ</span> Works
+              How <span>LANDLORDZ</span> Works
             </h2>
 
             <p className="workflow-intro">
@@ -230,7 +230,7 @@ export default function HomePage() {
               <div className="workflow-step">03</div>
               <h3>Smart Crop Recommendation</h3>
               <p>
-                Based on analysis, LAND-LORDZ suggests crops that maximize
+                Based on analysis, LANDLORDZ suggests crops that maximize
                 yield while minimizing agricultural risk.
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
             </h2>
 
             <p className="outcomes-intro">
-              LAND-LORDZ delivers measurable value by transforming raw land data
+              LANDLORDZ delivers measurable value by transforming raw land data
               into actionable agricultural intelligence.
             </p>
           </div>
@@ -294,7 +294,7 @@ export default function HomePage() {
           </div>
 
           <div className="outcomes-highlight">
-            By adopting LAND-LORDZ, farmers confidently transition from
+            By adopting LANDLORDZ, farmers confidently transition from
             traditional experience-based farming to modern,
             technology-assisted and sustainable agricultural practices.
           </div>
@@ -334,7 +334,7 @@ export default function HomePage() {
           </div>
 
           <div className="contact-highlight">
-            LAND-LORDZ is committed to empowering farmers with
+            LANDLORDZ is committed to empowering farmers with
             reliable, data-driven guidance for smarter and more
             sustainable agricultural decisions.
           </div>
@@ -344,7 +344,7 @@ export default function HomePage() {
       {/* ================= FOOTER ================= */}
       <footer className="footer">
         <div className="footer-container">
-          <p className="footer-brand">© 2026 LAND-LORDZ</p>
+          <p className="footer-brand">© 2026 LANDLORDZ</p>
           <p className="footer-tagline">
             Smart, Data-Driven Decisions for Profitable Farming
           </p>

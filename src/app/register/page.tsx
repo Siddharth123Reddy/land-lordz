@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./register.module.css";
 
 export default function RegisterPage() {
@@ -22,6 +22,14 @@ export default function RegisterPage() {
   const [pincode, setPincode] = useState(""); // ✅ NEW
 
   const [preview, setPreview] = useState("");
+
+   useEffect(() => {
+    const farmerId = localStorage.getItem("farmer_id");
+
+    if (farmerId) {
+      router.replace("/dashboard");
+    }
+  }, []);
 
   /* ================= STEP 1 ================= */
 
@@ -123,7 +131,7 @@ export default function RegisterPage() {
       <div className={styles.left}>
         <div className={styles.overlay}>
           <h1 className={styles.heroTitle}>
-            Join LAND-LORDZ <span>Today</span>
+            Join LANDLORDZ <span>Today</span>
           </h1>
           <p className={styles.heroText}>
             Register your land digitally and unlock smart agricultural insights.

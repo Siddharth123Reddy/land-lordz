@@ -30,6 +30,13 @@ export async function GET(req: Request) {
             geo_location,
             property_image,
             property_meta,
+
+           
+
+            -- Soil Fields
+            soil_ph,
+            recommended_crops,
+
             created_at
           FROM Properties
           WHERE property_id = @property_id
@@ -60,7 +67,15 @@ export async function GET(req: Request) {
                 STATE,
                 DISTRICT,
                 property_image,
+
+                
+
+                -- Soil Fields
+                soil_ph,
+                recommended_crops,
+
                 created_at,
+
                 ROW_NUMBER() OVER (
                     PARTITION BY property_name 
                     ORDER BY created_at DESC

@@ -40,7 +40,7 @@ export default function DashboardLayout({
         {/* LEFT - Logo */}
         <div className={styles.logoSection}>
           <Image src="/logoL.png" alt="Logo" width={45} height={45} />
-          <span className={styles.brandName}>LAND-LORDZ</span>
+          <span className={styles.brandName}>LANDLORDZ</span>
         </div>
 
         {/* CENTER - Links */}

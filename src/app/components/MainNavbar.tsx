@@ -38,12 +38,12 @@ export default function MainNavbar() {
           <div className="nav-logo" onClick={() => router.push("/")}>
             <Image
               src="/logoL.png"
-              alt="Land-Lordz Logo"
+              alt="LandLordz Logo"
               width={40}
               height={40}
               priority
             />
-            <span>LAND-LORDZ</span>
+            <span>LANDLORDZ</span>
           </div>
 
           {/* NAV LINKS */}

@@ -1,0 +1,23 @@
+[
+  {
+    "state": "Andhra Pradesh",
+    "district": "Kadapa",
+    "soilType": "Red",
+    "ph": 6.5,
+    "crops": ["Groundnut", "Millets", "Cotton"]
+  },
+  {
+    "state": "Andhra Pradesh",
+    "district": "Kadapa",
+    "soilType": "Black",
+    "ph": 7.2,
+    "crops": ["Cotton", "Sugarcane"]
+  },
+  {
+    "state": "Telangana",
+    "district": "Warangal",
+    "soilType": "Black",
+    "ph": 7.0,
+    "crops": ["Rice", "Maize"]
+  }
+]

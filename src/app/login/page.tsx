@@ -1,11 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../register/register.module.css"; // 🔥 USE SAME CSS
 
 export default function LoginPage() {
   const router = useRouter();
+
+  useEffect(() => {
+  const farmerId = localStorage.getItem("farmer_id");
+
+  if (farmerId) {
+    router.replace("/dashboard");
+  }
+}, []);
+  
 
   const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +65,7 @@ export default function LoginPage() {
       <div className={styles.left}>
         <div className={styles.overlay}>
           <h1 className={styles.heroTitle}>
-            Welcome Back to <span>LAND-LORDZ</span>
+            Welcome Back to <span>LANDLORDZ</span>
           </h1>
           <p className={styles.heroText}>
             Access your land records, properties and smart agricultural insights.

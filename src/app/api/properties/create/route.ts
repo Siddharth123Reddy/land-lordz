@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import sql from "mssql";
 import { getDb } from "@/lib/db";
 
+import { getSoilData } from "@/lib/getSoilData"; // ✅ Added
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -11,8 +13,8 @@ export async function POST(req: Request) {
       property_name,
       property_type,
       location,
-      STATE,
-      DISTRICT,
+      state,
+      district,
       geo_location,
       property_image,
       property_meta,
@@ -28,10 +30,26 @@ export async function POST(req: Request) {
       );
     }
 
+    /* ===============================
+       2️⃣ Get Climate Data
+    =============================== */
+   
+
+    /* ===============================
+       3️⃣ Get Soil Data (NEW)
+    =============================== */
+    let soilInfo = null;
+
+    if (state && district) {
+      soilInfo = getSoilData(state, district);
+    }
+    console.log("Soil Info:", soilInfo);
+    
+
     const pool = await getDb();
 
     /* ===============================
-       2️⃣ Insert Property
+       4️⃣ Insert Property
     =============================== */
     const result = await pool
       .request()
@@ -39,11 +57,22 @@ export async function POST(req: Request) {
       .input("property_name", sql.VarChar(150), property_name)
       .input("property_type", sql.VarChar(100), property_type || null)
       .input("location", sql.VarChar(150), location || null)
-      .input("STATE", sql.VarChar(100), STATE || null)
-      .input("DISTRICT", sql.VarChar(100), DISTRICT || null)
+      .input("STATE", sql.VarChar(100), state || null)
+      .input("DISTRICT", sql.VarChar(100), district || null)
       .input("geo_location", sql.VarChar(255), geo_location || null)
       .input("property_image", sql.NVarChar(sql.MAX), property_image || null)
       .input("property_meta", sql.NVarChar(sql.MAX), property_meta || null)
+      
+      .input("climate_days", sql.Int, 30)
+
+      // ✅ NEW Soil Fields
+      .input("soil_ph", sql.VarChar(50), soilInfo?.phCategory ?? null)
+      .input(
+        "recommended_crops",
+        sql.NVarChar(sql.MAX),
+        soilInfo ? JSON.stringify(soilInfo.crops) : null
+      )
+
       .query(`
         INSERT INTO Properties
         (
@@ -56,6 +85,9 @@ export async function POST(req: Request) {
           geo_location,
           property_image,
           property_meta,
+         
+          soil_ph,
+          recommended_crops,
           created_at
         )
         OUTPUT INSERTED.property_id
@@ -70,6 +102,9 @@ export async function POST(req: Request) {
           @geo_location,
           @property_image,
           @property_meta,
+        
+          @soil_ph,
+          @recommended_crops,
           GETDATE()
         )
       `);

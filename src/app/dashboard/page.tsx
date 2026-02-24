@@ -90,7 +90,7 @@ export default function DashboardPage() {
       {/* HERO */}
       <div className={styles.dashboardContainer}>
         <h1 className={styles.dashboardTitle}>
-          Welcome To <span>LAND-LORDZ</span>
+          Welcome To <span>LANDLORDZ</span>
         </h1>
 
         <p className={styles.dashboardSubtitle}>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
       {/* FOOTER */}
       <footer className={styles.simpleFooter}>
-        © 2026 LAND-LORDZ | Smart Land Management
+        © 2026 LANDLORDZ | Smart Land Management
       </footer>
 
     </div>

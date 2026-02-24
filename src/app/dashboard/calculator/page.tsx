@@ -19,9 +19,21 @@ type PropertyFull = {
   DISTRICT: string;
   geo_location: string;
   property_meta: string | null;
+  avg_temp: number | null;
+  total_rainfall: number | null;
+  climate_days: number | null;
+  soil_ph: string | null;
+  recommended_crops: string | null;
 };
 
-// Decorative SVG icons
+type WeeklyDay = {
+  date: string;
+  temp_max: number;
+  temp_min: number;
+  rainfall: number;
+};
+
+// ─── SVG Icons ───────────────────────────────────────────────────────────────
 const LeafIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
@@ -63,7 +75,7 @@ const CropIcon = () => (
   </svg>
 );
 
-// Fallback farm images from Unsplash (free, no auth needed)
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80",
   "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&q=80",
@@ -80,23 +92,237 @@ const CROP_DATA = [
   { name: "Pulses", icon: "🫘", color: "#fce4ec" },
 ];
 
+/** Return a weather emoji based on rainfall mm */
+function getWeatherIcon(rainfall: number): string {
+  if (rainfall > 10) return "⛈️";
+  if (rainfall > 3)  return "🌧️";
+  if (rainfall > 0)  return "🌦️";
+  return "☀️";
+}
+
+/** Format "2025-07-14" → "Mon\n14" */
+function formatDay(dateStr: string): { day: string; date: string } {
+  const d = new Date(dateStr);
+  return {
+    day: d.toLocaleDateString("en-US", { weekday: "short" }),
+    date: d.getDate().toString(),
+  };
+}
+
+// ─── WeatherSection Component ─────────────────────────────────────────────────
+function WeatherSection({
+  temperature,
+  rainfall,
+  weekly,
+  loading,
+}: {
+  temperature: number | null;
+  rainfall: number | null;
+  weekly: WeeklyDay[];
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className={styles.weatherSection}>
+        <div className={styles.weatherLoading}>
+          <div className={styles.weatherSpinner} />
+          <span>Fetching weather data…</span>
+        </div>
+      </div>
+    );
+  }
+
+  const today = weekly[0];
+
+  return (
+    <div className={styles.weatherSection}>
+      {/* Header */}
+      <div className={styles.containerHeader}>
+        <span>🌤️</span>
+        <h3>Weather Forecast</h3>
+      </div>
+      <p className={styles.cropsSubtitle}>Live conditions + 7-day outlook for this field</p>
+
+      {/* TODAY card */}
+      {today && (
+        <div className={styles.weatherTodayCard}>
+          <div className={styles.weatherTodayLeft}>
+            <span className={styles.weatherTodayIcon}>{getWeatherIcon(today.rainfall)}</span>
+            <div>
+              <div className={styles.weatherTodayLabel}>Today</div>
+              <div className={styles.weatherTodayDate}>
+                {new Date(today.date).toLocaleDateString("en-IN", {
+                  weekday: "long", day: "numeric", month: "long",
+                })}
+              </div>
+            </div>
+          </div>
+          <div className={styles.weatherTodayStats}>
+            <div className={styles.weatherTodayStat}>
+              <span className={styles.weatherStatIcon}>🌡️</span>
+              <div>
+                <div className={styles.weatherStatVal}>
+                  {temperature !== null ? `${temperature}°C` : `${today.temp_max}°C`}
+                </div>
+                <div className={styles.weatherStatLabel}>Current Temp</div>
+              </div>
+            </div>
+            <div className={styles.weatherTodayDivider} />
+            <div className={styles.weatherTodayStat}>
+              <span className={styles.weatherStatIcon}>🔼</span>
+              <div>
+                <div className={styles.weatherStatVal}>{today.temp_max}°C</div>
+                <div className={styles.weatherStatLabel}>High</div>
+              </div>
+            </div>
+            <div className={styles.weatherTodayDivider} />
+            <div className={styles.weatherTodayStat}>
+              <span className={styles.weatherStatIcon}>🔽</span>
+              <div>
+                <div className={styles.weatherStatVal}>{today.temp_min}°C</div>
+                <div className={styles.weatherStatLabel}>Low</div>
+              </div>
+            </div>
+            <div className={styles.weatherTodayDivider} />
+            <div className={styles.weatherTodayStat}>
+              <span className={styles.weatherStatIcon}>💧</span>
+              <div>
+                <div className={styles.weatherStatVal}>{today.rainfall} mm</div>
+                <div className={styles.weatherStatLabel}>Rainfall</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7-day forecast strip */}
+      <div className={styles.weatherWeekStrip}>
+        {weekly.map((day, i) => {
+          const { day: dayName, date: dayNum } = formatDay(day.date);
+          const isToday = i === 0;
+          return (
+            <div
+              key={day.date}
+              className={`${styles.weatherDayCard} ${isToday ? styles.weatherDayCardActive : ""}`}
+            >
+              <div className={styles.weatherDayName}>{isToday ? "Today" : dayName}</div>
+              <div className={styles.weatherDayNum}>{dayNum}</div>
+              <div className={styles.weatherDayIcon}>{getWeatherIcon(day.rainfall)}</div>
+              <div className={styles.weatherDayTemps}>
+                <span className={styles.weatherDayMax}>{day.temp_max}°</span>
+                <span className={styles.weatherDayMin}>{day.temp_min}°</span>
+              </div>
+              {/* Rainfall bar */}
+              <div className={styles.weatherRainBar}>
+                <div
+                  className={styles.weatherRainFill}
+                  style={{
+                    height: `${Math.min(100, (day.rainfall / 20) * 100)}%`,
+                    background: day.rainfall > 5 ? "#3b82f6" : "#93c5fd",
+                  }}
+                />
+              </div>
+              <div className={styles.weatherDayRain}>
+                {day.rainfall > 0 ? `${day.rainfall}mm` : "—"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Weekly summary chips */}
+      <div className={styles.weatherSummaryRow}>
+        <div className={styles.weatherChip} style={{ background: "#fef3c7", color: "#92400e" }}>
+          <span>🌡️</span>
+          <div>
+            <div className={styles.weatherChipVal}>
+              {weekly.length > 0
+                ? `${Math.min(...weekly.map((d) => d.temp_min))}° – ${Math.max(...weekly.map((d) => d.temp_max))}°C`
+                : "—"}
+            </div>
+            <div className={styles.weatherChipLabel}>Weekly Temp Range</div>
+          </div>
+        </div>
+        <div className={styles.weatherChip} style={{ background: "#eff6ff", color: "#1d4ed8" }}>
+          <span>🌧️</span>
+          <div>
+            <div className={styles.weatherChipVal}>
+              {rainfall !== null ? `${rainfall.toFixed(1)} mm` : "—"}
+            </div>
+            <div className={styles.weatherChipLabel}>Total 7-day Rainfall</div>
+          </div>
+        </div>
+        <div className={styles.weatherChip} style={{ background: "#f0fdf4", color: "#15803d" }}>
+          <span>☀️</span>
+          <div>
+            <div className={styles.weatherChipVal}>
+              {weekly.filter((d) => d.rainfall === 0).length} days
+            </div>
+            <div className={styles.weatherChipLabel}>Clear Days</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function CalculatorPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<PropertyList[]>([]);
   const [selected, setSelected] = useState<PropertyFull | null>(null);
+  const [temperature, setTemperature] = useState<number | null>(null);
+  const [rainfall, setRainfall] = useState<number | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyDay[]>([]);
+  const [weatherLoading, setWeatherLoading] = useState(false);
 
+  // Fetch weather when a property is selected
+  useEffect(() => {
+    if (!selected?.geo_location) return;
+    const geo = selected.geo_location;
+    if (!geo.includes(",")) return;
+
+    async function fetchWeather() {
+      setWeatherLoading(true);
+      setTemperature(null);
+      setRainfall(null);
+      setWeekly([]);
+      try {
+        const [lat, lon] = geo.split(",");
+        if (!lat || !lon) return;
+
+        const res = await fetch(`/api/weather?lat=${lat.trim()}&lon=${lon.trim()}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setTemperature(data?.current?.temperature ?? null);
+
+        if (data?.weekly) {
+          setWeekly(data.weekly);
+          const totalRain = data.weekly.reduce(
+            (sum: number, day: WeeklyDay) => sum + (day.rainfall ?? 0),
+            0
+          );
+          setRainfall(parseFloat(totalRain.toFixed(1)));
+        }
+      } catch (err) {
+        console.error("Weather fetch error:", err);
+      } finally {
+        setWeatherLoading(false);
+      }
+    }
+
+    fetchWeather();
+  }, [selected]);
+
+  // Fetch property list
   useEffect(() => {
     const farmerId = localStorage.getItem("farmer_id");
-    if (!farmerId) {
-      router.push("/login");
-      return;
-    }
+    if (!farmerId) { router.push("/login"); return; }
 
     fetch(`/api/properties/list?farmer_id=${farmerId}`)
       .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setProperties(data.properties);
-      });
+      .then((data) => { if (data.success) setProperties(data.properties); });
   }, [router]);
 
   const fetchFullProperty = async (id: number) => {
@@ -105,21 +331,18 @@ export default function CalculatorPage() {
     if (data.success) setSelected(data.property);
   };
 
+  // ── Property list screen ──────────────────────────────────────────────────
   if (!selected) {
     return (
       <div className={styles.pageWrapper}>
-        {/* Hero Banner */}
         <div className={styles.heroBanner}>
           <div className={styles.heroOverlay} />
-          <img
-            className={styles.heroImg}
+          <img className={styles.heroImg}
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1400&q=80"
             alt="Farm landscape"
           />
           <div className={styles.heroContent}>
-            <div className={styles.heroBadge}>
-              <LeafIcon /> Crop Intelligence
-            </div>
+            <div className={styles.heroBadge}><LeafIcon /> Crop Intelligence</div>
             <h1 className={styles.heroTitle}>Farm Calculator</h1>
             <p className={styles.heroSub}>
               Select a property to analyse soil health, climate data &amp; recommended crops
@@ -127,21 +350,16 @@ export default function CalculatorPage() {
           </div>
         </div>
 
-        {/* Grid */}
         <div className={styles.gridSection}>
           <p className={styles.gridLabel}>Your Properties — click to analyse</p>
           <div className={styles.grid}>
             {properties.map((property, i) => (
-              <div
-                key={property.property_id}
-                className={styles.card}
-                onClick={() => fetchFullProperty(property.property_id)}
-              >
+              <div key={property.property_id} className={styles.card}
+                onClick={() => fetchFullProperty(property.property_id)}>
                 <div className={styles.cardImgWrap}>
                   <img
                     src={
-                      property.property_image &&
-                      property.property_image.startsWith("data:image")
+                      property.property_image?.startsWith("data:image")
                         ? property.property_image
                         : FALLBACK_IMAGES[i % FALLBACK_IMAGES.length]
                     }
@@ -155,8 +373,7 @@ export default function CalculatorPage() {
                 <div className={styles.cardBody}>
                   <h3>{property.property_name || "Unnamed Property"}</h3>
                   <div className={styles.cardLocation}>
-                    <PinIcon />
-                    {property.location || "—"}
+                    <PinIcon />{property.location || "—"}
                   </div>
                   <div className={styles.cardCta}>View Analysis →</div>
                 </div>
@@ -168,22 +385,27 @@ export default function CalculatorPage() {
     );
   }
 
+  // ── Property detail screen ────────────────────────────────────────────────
   const meta = selected.property_meta ? JSON.parse(selected.property_meta) : {};
 
   const sideItems = [
-    { label: "Soil pH", icon: <SoilIcon />, value: meta?.soil_ph || "—", unit: "pH", accent: "#5e8a3a" },
-    { label: "Temperature", icon: <TempIcon />, value: meta?.temperature || "—", unit: "°C", accent: "#d97706" },
-    { label: "Rainfall", icon: <RainIcon />, value: meta?.rainfall || "—", unit: "mm", accent: "#3b82f6" },
-    { label: "Crops Grown", icon: <CropIcon />, value: meta?.crops_grown || "—", unit: "", accent: "#7c3aed" },
+    { label: "Soil pH",     icon: <SoilIcon />, value: selected?.soil_ph ?? "—",     unit: "",   accent: "#5e8a3a" },
+    { label: "Temperature", icon: <TempIcon />, value: temperature ?? "—",            unit: "°C", accent: "#d97706" },
+    { label: "Rainfall",    icon: <RainIcon />, value: rainfall ?? "—",              unit: "mm", accent: "#3b82f6" },
+    {
+      label: "Crops Grown",
+      icon: <CropIcon />,
+      value: selected?.recommended_crops?.trim() || "—",
+      unit: "",
+      accent: "#7c3aed",
+    },
   ];
 
   return (
     <div className={styles.detailPage}>
-
       {/* TOP HERO STRIP */}
       <div className={styles.detailHero}>
-        <img
-          className={styles.detailHeroImg}
+        <img className={styles.detailHeroImg}
           src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=1400&q=80"
           alt="farm"
         />
@@ -205,15 +427,13 @@ export default function CalculatorPage() {
 
       {/* MAIN BODY */}
       <div className={styles.mainLayout}>
-
         {/* LEFT */}
         <div className={styles.leftWrapper}>
-
-          {/* Location Cards */}
+          {/* Location chips */}
           <div className={styles.locationStrip}>
             {[
-              { label: "State", value: selected.STATE, icon: "🗺️" },
-              { label: "District", value: selected.DISTRICT, icon: "📍" },
+              { label: "State",        value: selected.STATE,        icon: "🗺️" },
+              { label: "District",     value: selected.DISTRICT,     icon: "📍" },
               { label: "Geo Location", value: selected.geo_location, icon: "🌐" },
             ].map((item) => (
               <div key={item.label} className={styles.locationChip}>
@@ -226,12 +446,9 @@ export default function CalculatorPage() {
             ))}
           </div>
 
-          {/* Additional Details */}
+          {/* Property Details */}
           <div className={styles.detailsContainer}>
-            <div className={styles.containerHeader}>
-              <LeafIcon />
-              <h3>Property Details</h3>
-            </div>
+            <div className={styles.containerHeader}><LeafIcon /><h3>Property Details</h3></div>
             <div className={styles.detailsBoxes}>
               {Object.entries(meta).length > 0 ? (
                 Object.entries(meta).map(([key, value]) => (
@@ -246,29 +463,26 @@ export default function CalculatorPage() {
             </div>
           </div>
 
+          {/* ── WEATHER SECTION ── */}
+          <WeatherSection
+            temperature={temperature}
+            rainfall={rainfall}
+            weekly={weekly}
+            loading={weatherLoading}
+          />
+
           {/* Recommended Crops */}
           <div className={styles.cropsContainer}>
-            <div className={styles.containerHeader}>
-              <span>🌱</span>
-              <h3>Recommended Crops</h3>
-            </div>
-            <p className={styles.cropsSubtitle}>
-              Based on soil type, climate &amp; location data
-            </p>
+            <div className={styles.containerHeader}><span>🌱</span><h3>Recommended Crops</h3></div>
+            <p className={styles.cropsSubtitle}>Based on soil type, climate &amp; location data</p>
             <div className={styles.cropRow}>
               {CROP_DATA.map((crop) => (
-                <div
-                  key={crop.name}
-                  className={styles.cropTag}
-                  style={{ "--crop-bg": crop.color } as React.CSSProperties}
-                >
-                  <span>{crop.icon}</span>
-                  {crop.name}
+                <div key={crop.name} className={styles.cropTag}
+                  style={{ "--crop-bg": crop.color } as React.CSSProperties}>
+                  <span>{crop.icon}</span>{crop.name}
                 </div>
               ))}
             </div>
-
-            {/* Farm image collage */}
             <div className={styles.cropImgRow}>
               {[
                 "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=300&q=75",
@@ -279,44 +493,30 @@ export default function CalculatorPage() {
               ))}
             </div>
           </div>
-
         </div>
 
         {/* RIGHT PANEL */}
         <div className={styles.rightPanel}>
           <p className={styles.rightPanelLabel}>Field Metrics</p>
           {sideItems.map((item) => (
-            <div
-              key={item.label}
-              className={styles.sideBox}
-              style={{ "--accent": item.accent } as React.CSSProperties}
-            >
-              <div className={styles.sideBoxIcon} style={{ color: item.accent }}>
-                {item.icon}
-              </div>
+            <div key={item.label} className={styles.sideBox}
+              style={{ "--accent": item.accent } as React.CSSProperties}>
+              <div className={styles.sideBoxIcon} style={{ color: item.accent }}>{item.icon}</div>
               <div className={styles.sideBoxContent}>
                 <span className={styles.sideBoxLabel}>{item.label}</span>
                 <p className={styles.sideBoxValue}>
-                  {item.value}
-                  {item.unit && <small> {item.unit}</small>}
+                  {item.value}{item.unit && <small> {item.unit}</small>}
                 </p>
               </div>
               <div className={styles.sideBoxBar} style={{ background: item.accent }} />
             </div>
           ))}
 
-          {/* Small landscape photo */}
           <div className={styles.sidePhotoCard}>
-            <img
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=75"
-              alt="landscape"
-            />
-            <div className={styles.sidePhotoOverlay}>
-              <span>🌤️ Field Overview</span>
-            </div>
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=75" alt="landscape" />
+            <div className={styles.sidePhotoOverlay}><span>🌤️ Field Overview</span></div>
           </div>
         </div>
-
       </div>
     </div>
   );
